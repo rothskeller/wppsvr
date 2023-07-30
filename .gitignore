@@ -1,0 +1,6 @@
+*.log
+/config.yaml
+log
+run.lock
+wppsvr.db
+wppsvr
