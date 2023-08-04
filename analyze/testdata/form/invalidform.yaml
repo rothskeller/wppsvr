@@ -47,7 +47,7 @@ stored:
   summary: invalid form contents
 analysisREs:
   - form with invalid contents
-  - valid severity value
+  - one of its allowed values
   - From Location.*required
 
 # Messages that should be sent in response:

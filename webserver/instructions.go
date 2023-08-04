@@ -79,15 +79,11 @@ func (ws *webserver) serveInstructions(w http.ResponseWriter, r *http.Request) {
 		}
 		para.R(" plain text message with the text shown below")
 	default:
-		para.TF("the %s shown below", msg.Type().Name)
-		if f, ok := msg.(message.KnownForm); ok {
-			if f.GetHandling() == "" {
-				needHandling = true
-			}
-			if kf := f.KeyFields(); kf.ToICSPosition == "" || kf.ToLocation == "" {
-				needDestination = true
-			}
-		}
+		var mb = msg.Base()
+		para.TF("the %s shown below", mb.Type.Name)
+		needHandling = mb.FHandling != nil && *mb.FHandling == ""
+		needDestination = (mb.FToICSPosition != nil && *mb.FToICSPosition == "") ||
+			(mb.FToLocation != nil && *mb.FToLocation == "")
 	}
 	para.TF(" to %s at the appropriate BBS.  The message must be received there between %s and %s.",
 		session.CallSign, session.Start.Format("15:04 on Monday"), session.End.Format("15:04 on Monday"))

@@ -25,10 +25,10 @@ type Analysis struct {
 	body string
 	// msg is the decoded message contents.
 	msg message.Message
+	// mb is the underlying BaseMessage.
+	mb *message.BaseMessage
 	// session is the session for which the message was received.
 	session *store.Session
-	// key is the set of key fields from the message.
-	key *message.KeyFields
 	// score is the number of score points, 0 <= score <= outOf.
 	score int
 	// outOf is the maximum number of score points.
@@ -81,7 +81,8 @@ func Analyze(st astore, session *store.Session, bbs, raw string) *Analysis {
 	// Determine the message type (if no parse error and not a bounce).
 	if err == nil && !a.env.Autoresponse {
 		a.msg = message.Decode(a.subject, a.body)
-		a.sm.MessageType = a.msg.Type().Tag
+		a.mb = a.msg.Base()
+		a.sm.MessageType = a.mb.Type.Tag
 	}
 	// Find the problems with the message.
 	a.analysis = new(strings.Builder)
@@ -121,7 +122,7 @@ func (a *Analysis) Commit(st astore) {
 	a.fetchJurisdiction()
 	st.SaveMessage(&a.sm)
 	if a.msg != nil {
-		tag = a.msg.Type().Tag
+		tag = a.msg.Base().Type.Tag
 	} else {
 		tag = "-"
 	}

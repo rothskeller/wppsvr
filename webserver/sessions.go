@@ -62,7 +62,7 @@ func (ws *webserver) serveSessionList(w http.ResponseWriter, r *http.Request) {
 		tr.E("td>%s", session.Name)
 		tr.E("td>%s", strings.Join(session.DownBBSes, ", "))
 		if session.ModelMsg != nil {
-			tr.E("td>Model %s", session.ModelMsg.Type().Tag)
+			tr.E("td>Model %s", session.ModelMsg.Base().Type.Tag)
 		} else {
 			tr.E("td>Any %s", strings.Join(session.MessageTypes, ", "))
 		}

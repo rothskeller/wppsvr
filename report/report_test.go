@@ -138,7 +138,6 @@ This report was generated on Tuesday, April 19, 2022 at 20:00 by wppsvr.
 
 func TestReport(t *testing.T) {
 	xscmsg.Register()
-	now = func() time.Time { return time.Date(2022, 4, 19, 20, 0, 1, 0, time.Local) }
 	actual := Generate(fakeStore{}, &fakeSession3).RenderPlainText()
 	if actual != expected {
 		t.Errorf("incorrect report output:\n%s", actual)

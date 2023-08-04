@@ -10,7 +10,7 @@ import (
 
 	"github.com/rothskeller/packet/envelope"
 	"github.com/rothskeller/packet/jnos"
-	"github.com/rothskeller/packet/message/common"
+	"github.com/rothskeller/packet/message"
 	"github.com/rothskeller/wppsvr/config"
 	"github.com/rothskeller/wppsvr/store"
 )
@@ -26,7 +26,7 @@ func Send(st Store, conn *jnos.Conn, session *store.Session) {
 	}
 	session.Report = report.RenderPlainText()
 	st.UpdateSession(session)
-	subject := common.EncodeSubject(st.NextMessageID(session.Prefix), "ROUTINE", "", "SCCo Packet Practice Report")
+	subject := message.EncodeSubject(st.NextMessageID(session.Prefix), "ROUTINE", "", "SCCo Packet Practice Report")
 	body := new(envelope.Envelope).RenderBody(session.Report)
 	// To avoid potential problems with JNOS line length limits, we
 	// send to each recipient separately.

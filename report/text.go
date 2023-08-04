@@ -8,7 +8,6 @@ import (
 	"github.com/rothskeller/wppsvr/english"
 )
 
-const dashes = "--------------------------------------------------------------------------------"
 const spaces = "                                                                                "
 
 // RenderPlainText renders a report in plain text format.
@@ -185,15 +184,6 @@ func (r *Report) plainTextGenInfo(sb *strings.Builder) {
 	wr.Close()
 }
 
-func leftAlign(ss []string) {
-	var maxlen = maxlength(ss)
-	for i, s := range ss {
-		if len(s) < maxlen {
-			ss[i] = s + spaces[:maxlen-len(s)]
-		}
-	}
-}
-
 func rightAlign(ss []string) {
 	var maxlen = maxlength(ss)
 	for i, s := range ss {
@@ -219,14 +209,6 @@ func sideBySide(block1, block2 []string, gap int) (combined []string) {
 		combined = append(combined, fmt.Sprintf("%-*s%s", maxlen+gap, "", block2[linenum]))
 	}
 	return combined
-}
-
-func addPlainTextHeading(ss []string, head string) []string {
-	var maxlen = maxlength(ss)
-	if maxlen > len(head) {
-		head = head + dashes[:maxlen-len(head)]
-	}
-	return append([]string{head}, ss...)
 }
 
 func maxlength(ss []string) (maxlen int) {

@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/rothskeller/packet/message"
-	"github.com/rothskeller/packet/message/common"
 	"github.com/rothskeller/packet/xscmsg/delivrcpt"
 	"github.com/rothskeller/packet/xscmsg/plaintext"
 	"github.com/rothskeller/packet/xscmsg/readrcpt"
@@ -93,23 +92,20 @@ func (a *Analysis) messageCounts(parseErr error) bool {
 	if match := fromBBSRE.FindStringSubmatch(a.env.ReturnAddr); match != nil {
 		a.sm.FromBBS = strings.ToUpper(match[1])
 	}
-	if f, ok := a.msg.(message.KnownForm); ok {
-		a.key = f.KeyFields()
-	}
 	if match := fromCallSignRE.FindStringSubmatch(a.env.ReturnAddr); match != nil && (fccCallSignRE.MatchString(match[1]) || a.sm.FromBBS != "") {
 		// We'll take an FCC call sign in the return address as the
 		// call sign to credit.  A tactical call sign in the return
 		// address counts only if the message is coming from a BBS;
 		// otherwise we can't be sure it's a tactical call sign.
 		a.sm.FromCallSign = strings.ToUpper(match[1])
-	} else if a.key != nil {
+	} else if a.mb.FOpCall != nil {
 		// No call sign in the return address.  But it's a form with an
 		// OpCall field; hopefully there's one there.
-		a.sm.FromCallSign = a.key.OpCall
+		a.sm.FromCallSign = *a.mb.FOpCall
 	}
 	if a.sm.FromCallSign == "" {
 		a.setSummary("no call sign in message")
-		if _, ok := a.msg.(message.KnownForm); ok {
+		if a.mb.FOpCall != nil {
 			a.analysis.WriteString(`<h2>No Call Sign in Message</h2><p>This message cannot be counted because it’s not clear who sent it.  There is no call sign in the return address or in the Operator Call field of the form.  In order for the message to count, there must be a call sign in at least one of those places.</p>`)
 		} else {
 			a.analysis.WriteString(`<h2>No Call Sign in Message</h2><p>This message cannot be counted because it’s not clear who sent it.  There is no call sign in the return address.  In order the message to count, it must come from a BBS mailbox or email account whose name is a call sign.`)
@@ -160,7 +156,7 @@ func (a *Analysis) checkCorrectness() {
 		a.score++
 	}
 	// Some checks only apply to form messages (of known form types).
-	if a.key != nil {
+	if a.mb.FToICSPosition != nil {
 		// Make sure the message subject matches the form.
 		a.outOf++
 		subject := a.msg.EncodeSubject()
@@ -172,32 +168,30 @@ func (a *Analysis) checkCorrectness() {
 			a.score++
 		}
 		// Make sure the message is valid according to PackItForms' rules.
-		if f, ok := a.msg.(message.IValidate); ok {
-			if problems := f.Validate(); len(problems) != 0 {
-				a.outOf += len(problems)
-				a.setSummary("invalid form contents")
-				a.analysis.WriteString(`<h2>Invalid Form Contents</h2><p style="margin-bottom:0">This message contains a form with invalid contents:</p><ul style="margin-top:0;margin-bottom:0">`)
-				for _, problem := range problems {
-					fmt.Fprintf(a.analysis, "<li>%s</li>", html.EscapeString(problem))
-				}
-				a.analysis.WriteString(`</ul><p style="margin-top:0">Please verify the correctness of the form before sending.</p>`)
+		if problems := a.mb.PIFOValid(); len(problems) != 0 {
+			a.outOf += len(problems)
+			a.setSummary("invalid form contents")
+			a.analysis.WriteString(`<h2>Invalid Form Contents</h2><p style="margin-bottom:0">This message contains a form with invalid contents:</p><ul style="margin-top:0;margin-bottom:0">`)
+			for _, problem := range problems {
+				fmt.Fprintf(a.analysis, "<li>%s</li>", html.EscapeString(problem))
 			}
+			a.analysis.WriteString(`</ul><p style="margin-top:0">Please verify the correctness of the form before sending.</p>`)
 		}
 		// Make sure the PIFO and form versions are up to date.
 		a.outOf += 2
 		var minPIFO = config.Get().MinPIFOVersion
-		var minForm = config.Get().MessageTypes[a.msg.Type().Tag].MinimumVersion
-		if message.OlderVersion(a.key.PIFOVersion, minPIFO) {
+		var minForm = config.Get().MessageTypes[a.mb.Type.Tag].MinimumVersion
+		if message.OlderVersion(a.mb.PIFOVersion, minPIFO) {
 			a.setSummary("PackItForms version out of date")
 			fmt.Fprintf(a.analysis, "<h2>PackItForms Version Out of Date</h2><p>This message used version %s of PackItForms to encode the form, but that version is not current.  Please use PackItForms version %s or newer to encode messages containing forms.</p>",
-				a.key.PIFOVersion, minPIFO)
+				a.mb.PIFOVersion, minPIFO)
 		} else {
 			a.score++
 		}
-		if message.OlderVersion(a.key.FormVersion, minForm) {
+		if message.OlderVersion(a.mb.Form.Version, minForm) {
 			a.setSummary("form version out of date")
 			fmt.Fprintf(a.analysis, "<h2>Form Version Out of Date</h2><p>This message contains version %s of the %s, but that version is not current.  Please use version %s or newer of the form.  (You can get the newer form by updating your PackItForms installation.)",
-				a.key.FormVersion, html.EscapeString(a.msg.Type().Name), minForm)
+				a.mb.Form.Version, html.EscapeString(a.mb.Type.Name), minForm)
 		} else {
 			a.score++
 		}
@@ -205,7 +199,7 @@ func (a *Analysis) checkCorrectness() {
 	} else { // checks for plain text messages (or forms of unknown type)
 		// Check the message subject format.
 		a.outOf += 3
-		msgid, severity, handling, formtag, _ := common.DecodeSubject(a.subject)
+		msgid, severity, handling, formtag, _ := message.DecodeSubject(a.subject)
 		if msgid == "" {
 			a.setSummary("incorrect subject line format")
 			a.analysis.WriteString(`<h2>Incorrect Subject Line Format</h2><p>This message has an incorrect subject line format.  According to the SCCo “Standard Packet Message Subject Line” (available on the <a href="https://www.scc-ares-races.org/data/packet/index.html">“Packet BBS Service” page</a> of the county ARES website), the subject line should look like <tt>AAA-111P_R_Subject</tt>, where <tt>AAA-111P</tt> is the message number, <tt>R</tt> is the handling order code, and <tt>Subject</tt> is the message subject.</p>`)
@@ -255,7 +249,7 @@ func nonASCII(r rune) bool {
 // checkMessageNumber checks the validity of the message number passed to it.
 // (It comes from different places in forms and non-forms messages.)
 func (a *Analysis) checkMessageNumber() {
-	msgid := a.msg.(message.HumanMessage).GetOriginID()
+	msgid := *a.msg.Base().FOriginMsgID
 	if msgid != "" {
 		a.outOf++
 		if !msgnumRE.MatchString(msgid) {
@@ -281,7 +275,7 @@ func (a *Analysis) checkMessageNumber() {
 // have a model message to compare against.  Any problems are added to the
 // analysis.
 func (a *Analysis) checkNonModel() {
-	if a.key != nil {
+	if a.mb.FToICSPosition != nil {
 		// Make sure the message has a destination allowed by the
 		// recommended routing cheat sheet.
 		var (
@@ -293,16 +287,16 @@ func (a *Analysis) checkNonModel() {
 			exphand string
 			acthand string
 		)
-		mtc = config.Get().MessageTypes[a.msg.Type().Tag]
+		mtc = config.Get().MessageTypes[a.mb.Type.Tag]
 		if len(mtc.ToICSPosition) != 0 {
 			a.outOf++
-			if badpos = !inList(mtc.ToICSPosition, a.key.ToICSPosition); !badpos {
+			if badpos = !inList(mtc.ToICSPosition, *a.mb.FToICSPosition); !badpos {
 				a.score++
 			}
 		}
 		if len(mtc.ToLocation) != 0 {
 			a.outOf++
-			if badloc = !inList(mtc.ToLocation, a.key.ToLocation); !badloc {
+			if badloc = !inList(mtc.ToLocation, *a.mb.FToLocation); !badloc {
 				a.score++
 			}
 		}
@@ -323,26 +317,26 @@ func (a *Analysis) checkNonModel() {
 		if badpos && badloc {
 			a.setSummary("incorrect destination for form")
 			fmt.Fprintf(a.analysis, `<h2>Incorrect Destination for Form</h2><p>This message form is addressed to ICS Position “%s” at Location “%s”.  According to the “SCCo ARES/RACES Recommended Form Routing” document (available on the <a href="https://www.scc-ares-races.org/operations/go-kit-forms.">“Go Kit Forms” page</a> of the county ARES website), %ss should be addressed to %s at %s.</p>`,
-				html.EscapeString(a.key.ToICSPosition), html.EscapeString(a.key.ToLocation), html.EscapeString(a.msg.Type().Name), exppos, exploc)
+				html.EscapeString(*a.mb.FToICSPosition), html.EscapeString(*a.mb.FToLocation), html.EscapeString(a.mb.Type.Name), exppos, exploc)
 		} else if badpos {
 			a.setSummary(`incorrect "To ICS Position" for form`)
 			fmt.Fprintf(a.analysis, `<h2>Incorrect “To ICS Position” for Form</h2><p>This message form is addressed to ICS Position “%s”.  According to the “SCCo ARES/RACES Recommended Form Routing” document (available on the <a href="https://www.scc-ares-races.org/operations/go-kit-forms.html">“Go Kit Forms” page</a> of the county ARES website), %ss should be addressed to ICS Position %s.</p>`,
-				html.EscapeString(a.key.ToICSPosition), html.EscapeString(a.msg.Type().Name), exppos)
+				html.EscapeString(*a.mb.FToICSPosition), html.EscapeString(a.mb.Type.Name), exppos)
 		} else if badloc {
 			a.setSummary(`incorrect "To Location" for form`)
 			fmt.Fprintf(a.analysis, `<h2>Incorrect “To Location” for Form</h2><p>This message form is addressed to Location “%s”.  According to the “SCCo ARES/RACES Recommended Form Routing” document (available on the <a href="https://www.scc-ares-races.org/operations/go-kit-forms.html">“Go Kit Forms” page</a> of the county ARES website), %ss should be addressed to Location %s.</p>`,
-				html.EscapeString(a.key.ToLocation), html.EscapeString(a.msg.Type().Name), exploc)
+				html.EscapeString(*a.mb.FToLocation), html.EscapeString(a.mb.Type.Name), exploc)
 		}
 		// Make sure the message has a handling order allowed by the
 		// recommended routing cheat sheet.
-		exphand = config.Get().MessageTypes[a.msg.Type().Tag].HandlingOrder
+		exphand = config.Get().MessageTypes[a.mb.Type.Tag].HandlingOrder
 		if exphand == "computed" {
 			exphand = config.ComputeRecommendedHandlingOrder(a.msg)
 		}
 		if exphand != "" {
 			a.outOf++
-			if msg, ok := a.msg.(message.HumanMessage); ok {
-				acthand = msg.GetHandling()
+			if b := a.msg.Base(); b.FHandling != nil {
+				acthand = *b.FHandling
 			}
 			if exphand != "" && exphand != acthand {
 				a.setSummary("incorrect handling order for form")
@@ -367,7 +361,7 @@ func (a *Analysis) checkNonModel() {
 		// problem gets reported elsewhere.
 		allowed = append(allowed, plaintext.Type.Tag)
 	}
-	if !inList(allowed, a.msg.Type().Tag) {
+	if !inList(allowed, a.mb.Type.Tag) {
 		var (
 			allowed []string
 			article string
@@ -381,7 +375,7 @@ func (a *Analysis) checkNonModel() {
 		}
 		a.setSummary("incorrect message type")
 		fmt.Fprintf(a.analysis, "<h2>Incorrect Message Type</h2><p>This message is %s %s.  For the %s on %s, %s %s is expected.</p>",
-			a.msg.Type().Article, html.EscapeString(a.msg.Type().Name), html.EscapeString(a.session.Name),
+			a.mb.Type.Article, html.EscapeString(a.mb.Type.Name), html.EscapeString(a.session.Name),
 			a.session.End.Format("January 2"), article, english.Conjoin(allowed, "or"))
 	} else {
 		a.score++
@@ -392,12 +386,12 @@ func (a *Analysis) checkNonModel() {
 // for the session.  Any problems are added to the analysis.
 func (a *Analysis) compareAgainstModel() {
 	// Make sure the received message is the same type as the model.
-	if a.msg.Type() != a.session.ModelMsg.Type() {
+	if a.mb.Type != a.session.ModelMsg.Base().Type {
 		a.outOf *= 2 // Give a 50% score.
 		a.setSummary("incorrect message type")
 		fmt.Fprintf(a.analysis, "<h2>Incorrect Message Type</h2><p>This message is %s %s.  For the %s on %s, operators are expected to send a copy of the provided %s.</p>",
-			a.msg.Type().Article, html.EscapeString(a.msg.Type().Name), html.EscapeString(a.session.Name),
-			a.session.End.Format("January 2"), html.EscapeString(a.session.ModelMsg.Type().Name))
+			a.mb.Type.Article, html.EscapeString(a.mb.Type.Name), html.EscapeString(a.session.Name),
+			a.session.End.Format("January 2"), html.EscapeString(a.session.ModelMsg.Base().Type.Name))
 		return
 	}
 	// Compare the message against the model.
@@ -407,7 +401,7 @@ func (a *Analysis) compareAgainstModel() {
 	// sheet.  If so, we need to fix up the results of the comparison for
 	// that.
 	var recRouteMismatch []string
-	if mtc := config.Get().MessageTypes[a.session.ModelMsg.Type().Tag]; mtc != nil {
+	if mtc := config.Get().MessageTypes[a.session.ModelMsg.Base().Type.Tag]; mtc != nil {
 		score, recRouteMismatch = a.fixupRecRouteFields(score, fields, mtc)
 	}
 	a.score += score

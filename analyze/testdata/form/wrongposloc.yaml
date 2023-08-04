@@ -1,9 +1,9 @@
 # Message has wrong To ICS Position and Location.
 
-# Allow JurisStat forms for session:
+# Allow MuniStat forms for session:
 session:
   messageTypes:
-    - JurisStat
+    - MuniStat
 
 # Message being analyzed:
 message: |
@@ -38,7 +38,7 @@ stored:
   fromCallSign: KC6RSC
   fromBBS: W1XSC
   jurisdiction: SNY
-  messageType: JurisStat
+  messageType: MuniStat
   score: 50
   summary: incorrect destination for form
 analysisREs:

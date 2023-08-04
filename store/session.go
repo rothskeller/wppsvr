@@ -43,7 +43,7 @@ type Session struct {
 	Report       string       `yaml:"-"`
 	Flags        SessionFlags `yaml:"flags"`
 
-	ModelMsg         message.ICompare  `yaml:"-"`
+	ModelMsg         message.Message   `yaml:"-"`
 	RetrieveInterval interval.Interval `yaml:"-"`
 }
 
@@ -144,7 +144,7 @@ func (s *Store) getSessionsWhere(where string, args ...interface{}) (list []*Ses
 		session.RetrieveInterval = interval.Parse(session.RetrieveAt)
 		if session.ModelMessage != "" {
 			if env, body, err := envelope.ParseSaved(session.ModelMessage); err == nil {
-				session.ModelMsg = message.Decode(env.SubjectLine, body).(message.ICompare)
+				session.ModelMsg = message.Decode(env.SubjectLine, body)
 			} else {
 				panic(err)
 			}
@@ -183,6 +183,9 @@ func (s *Store) CreateSession(session *Session) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	tx, err = s.dbh.Begin()
+	if err != nil {
+		panic(err)
+	}
 	result, err = tx.Exec("INSERT INTO session (callsign, name, prefix, start, end, reporttotext, reporttohtml, tobbses, downbbses, messagetypes, modelmessage, instructions, retrieveat, report, flags) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
 		session.CallSign, session.Name, session.Prefix, session.Start, session.End,
 		strings.Join(session.ReportToText, ";"), strings.Join(session.ReportToHTML, ";"), strings.Join(session.ToBBSes, ";"),

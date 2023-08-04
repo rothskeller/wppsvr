@@ -13,9 +13,6 @@ import (
 	"github.com/rothskeller/wppsvr/store"
 )
 
-// This function returns the current time; it can be overridden by tests.
-var now = func() time.Time { return time.Now() }
-
 // Generate generates the report for the specified session.
 func Generate(st Store, session *store.Session) *Report {
 	var (
@@ -64,7 +61,7 @@ func generateTitle(r *Report, session *store.Session) {
 func generateParams(r *Report, session *store.Session) {
 	if session.ModelMsg != nil {
 		r.HasModel = true
-		r.MessageTypes = []string{session.ModelMsg.Type().Name}
+		r.MessageTypes = []string{session.ModelMsg.Base().Type.Name}
 	} else {
 		for _, id := range session.MessageTypes {
 			if mt := message.RegisteredTypes[id]; mt != nil {

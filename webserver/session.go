@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/rothskeller/packet/message"
-	"github.com/rothskeller/packet/message/common"
 	"github.com/rothskeller/packet/xscmsg/plaintext"
 	"github.com/rothskeller/wppsvr/config"
 	"github.com/rothskeller/wppsvr/htmlb"
@@ -538,7 +537,7 @@ func readPlainSubject(r *http.Request, session *store.Session, show bool) string
 	if subject == "" {
 		return "The subject line is required."
 	}
-	if _, _, _, formtag, realsubj := common.DecodeSubject(subject); realsubj == subject || formtag != "" {
+	if _, _, _, formtag, realsubj := message.DecodeSubject(subject); realsubj == subject || formtag != "" {
 		return "This is not a standard SCCo subject line for a plain text message."
 	}
 	return ""
@@ -602,9 +601,6 @@ func readFormBody(r *http.Request, session *store.Session, show bool) string {
 	form := message.Decode("", body)
 	if _, ok := form.(*plaintext.PlainText); ok {
 		return "This is not a valid PackItForms-encoded form."
-	}
-	if _, ok := form.(message.ICompare); !ok {
-		return "This is not a form type for which comparison logic has been implemented."
 	}
 	return ""
 }
