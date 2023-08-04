@@ -19,7 +19,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/rothskeller/packet/xscmsg/allmsg"
+	"github.com/rothskeller/packet/xscmsg"
 	"github.com/rothskeller/wppsvr/config"
 	"github.com/rothskeller/wppsvr/retrieve"
 	"github.com/rothskeller/wppsvr/store"
@@ -33,7 +33,7 @@ func main() {
 	)
 	openLog()
 	ensureSingleton()
-	allmsg.Register()
+	xscmsg.Register()
 	if st, err = store.Open(); err != nil {
 		log.Fatalf("ERROR: %s", err)
 	}

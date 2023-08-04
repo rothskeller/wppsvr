@@ -10,7 +10,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/rothskeller/packet/xscmsg/allmsg"
+	"github.com/rothskeller/packet/xscmsg"
 	"github.com/rothskeller/wppsvr/analyze"
 	"github.com/rothskeller/wppsvr/config"
 	"github.com/rothskeller/wppsvr/report"
@@ -24,7 +24,7 @@ func main() {
 		messages []*store.Message
 		err      error
 	)
-	allmsg.Register()
+	xscmsg.Register()
 	if err = config.Read(); err != nil {
 		log.Fatal(err)
 	}

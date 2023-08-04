@@ -10,7 +10,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/rothskeller/packet/xscmsg/allmsg"
+	"github.com/rothskeller/packet/xscmsg"
 	"github.com/rothskeller/wppsvr/config"
 	"github.com/rothskeller/wppsvr/report"
 	"github.com/rothskeller/wppsvr/store"
@@ -34,7 +34,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "usage: send-report session-date email-address...\n")
 		os.Exit(2)
 	}
-	allmsg.Register()
+	xscmsg.Register()
 	if err = config.Read(); err != nil {
 		log.Fatal(err)
 	}

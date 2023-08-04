@@ -11,7 +11,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/rothskeller/packet/xscmsg/allmsg"
+	"github.com/rothskeller/packet/xscmsg"
 	"github.com/rothskeller/wppsvr/analyze"
 	"github.com/rothskeller/wppsvr/config"
 	"github.com/rothskeller/wppsvr/store"
@@ -26,7 +26,7 @@ func main() {
 		rawmsg  []byte
 		err     error
 	)
-	allmsg.Register()
+	xscmsg.Register()
 	if len(os.Args) != 3 {
 		fmt.Fprintf(os.Stderr, "usage: fakereceive frommailbox frombbs < messagetext\n")
 		os.Exit(2)

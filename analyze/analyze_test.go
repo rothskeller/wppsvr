@@ -25,7 +25,7 @@ import (
 
 	"github.com/rothskeller/packet/envelope"
 	"github.com/rothskeller/packet/message"
-	"github.com/rothskeller/packet/xscmsg/allmsg"
+	"github.com/rothskeller/packet/xscmsg"
 	"github.com/rothskeller/wppsvr/config"
 	"github.com/rothskeller/wppsvr/store"
 )
@@ -50,7 +50,7 @@ func TestAnalyze(t *testing.T) {
 	var testfiles []string
 	log.SetOutput(io.Discard)
 	TestForceJurisdiction = "SNY"
-	allmsg.Register()
+	xscmsg.Register()
 	filepath.WalkDir("testdata", func(path string, info fs.DirEntry, err error) error {
 		if strings.HasSuffix(path, ".yaml") && path != "testdata/config.yaml" {
 			testfiles = append(testfiles, path)

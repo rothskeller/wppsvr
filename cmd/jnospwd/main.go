@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/rothskeller/packet/xscmsg/allmsg"
+	"github.com/rothskeller/packet/xscmsg"
 	"github.com/rothskeller/wppsvr/config"
 )
 
@@ -18,7 +18,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "usage: jnospwd bbsname mailbox challenge\n")
 		os.Exit(2)
 	}
-	allmsg.Register()
+	xscmsg.Register()
 	config.Read()
 	bbs := config.Get().BBSes[strings.ToUpper(os.Args[1])]
 	if bbs == nil {
