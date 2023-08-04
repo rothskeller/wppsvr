@@ -5,6 +5,7 @@
   display: grid;
   grid: auto-flow / max-content auto;
   gap: 0.25rem 1rem;
+  user-select: none;
 }
 #plainmodel div:nth-child(2n+1) {
   font-weight: bold;

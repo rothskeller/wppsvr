@@ -36,7 +36,7 @@ func (ws *webserver) serveInstructions(w http.ResponseWriter, r *http.Request) {
 	html.E("title>Weekly Packet Practice - Santa Clara County ARES/RACES")
 	html.E("meta name=viewport content='width=device-width, initial-scale=1'")
 	html.E("link rel=stylesheet href=/static/common.css")
-	html.E("link rel=stylesheet href=/static/instructions.css")
+	html.E("link rel=stylesheet href=/static/instructions2.css")
 	html.E("div id=org>Santa Clara County ARES<sup>®</sup>/RACES")
 	html.E("div id=title>Weekly Packet Practice")
 	html.E("div id=subtitle>%s — %s", session.Name, session.End.Format("January 2, 2006"))
