@@ -8,8 +8,11 @@ github.com/mattn/go-sqlite3 v1.14.12 h1:TJ1bhYJPV44phC+IMu1u2K/i5RriLTPe+yc68XDJ
 github.com/mattn/go-sqlite3 v1.14.12/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
 github.com/rothskeller/packet v1.5.0 h1:vaTR82hrVqpdeDrn89Re07enXz2r7YUMjos+vUhIWak=
 github.com/rothskeller/packet v1.5.0/go.mod h1:JEYPccr/eWzpZs5veC92LcCX8mT/720G3rn+hMY35FE=
+github.com/rothskeller/packet v1.6.0 h1:raGJw1WAmRNhLrHY2cdDAXwTHAMctIXnfdKtqwBylmA=
+github.com/rothskeller/packet v1.6.0/go.mod h1:XJrr1fDsq3oteqGIy+95Uv/+CENBe++PQyZiWagc2ig=
 github.com/rothskeller/pdf v1.0.0 h1:Q2hvBzd3rzwnMWtFrobaNDUENYwGdMFaBI6eGZDVqvM=
 github.com/rothskeller/pdf v1.0.0/go.mod h1:LVIMDkp7uQUg7KbvPITMJKZstZO53+X92QQSFM+pwHY=
+github.com/rothskeller/pdf v1.1.1/go.mod h1:LVIMDkp7uQUg7KbvPITMJKZstZO53+X92QQSFM+pwHY=
 golang.org/x/sys v0.10.0 h1:SqMFp9UcQJZa+pmYuAKjd9xq1f0j5rLcDIk0mj4qAsA=
 golang.org/x/sys v0.10.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
