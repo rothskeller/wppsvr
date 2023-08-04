@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/rothskeller/packet/message/allmsg"
+	"github.com/rothskeller/packet/xscmsg/allmsg"
 	"github.com/rothskeller/wppsvr/config"
 )
 

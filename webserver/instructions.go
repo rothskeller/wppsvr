@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/rothskeller/packet/message"
-	"github.com/rothskeller/packet/message/plaintext"
+	"github.com/rothskeller/packet/xscmsg/plaintext"
 	"github.com/rothskeller/wppsvr/english"
 	"github.com/rothskeller/wppsvr/htmlb"
 	"github.com/rothskeller/wppsvr/store"

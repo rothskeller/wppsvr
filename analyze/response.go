@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rothskeller/packet/message/delivrcpt"
-	"github.com/rothskeller/packet/message/readrcpt"
+	"github.com/rothskeller/packet/xscmsg/delivrcpt"
+	"github.com/rothskeller/packet/xscmsg/readrcpt"
 	"github.com/rothskeller/wppsvr/store"
 )
 

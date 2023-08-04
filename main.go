@@ -19,7 +19,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/rothskeller/packet/message/allmsg"
+	"github.com/rothskeller/packet/xscmsg/allmsg"
 	"github.com/rothskeller/wppsvr/config"
 	"github.com/rothskeller/wppsvr/retrieve"
 	"github.com/rothskeller/wppsvr/store"

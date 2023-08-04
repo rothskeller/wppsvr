@@ -12,9 +12,9 @@ import (
 
 	"github.com/rothskeller/packet/message"
 	"github.com/rothskeller/packet/message/common"
-	"github.com/rothskeller/packet/message/delivrcpt"
-	"github.com/rothskeller/packet/message/plaintext"
-	"github.com/rothskeller/packet/message/readrcpt"
+	"github.com/rothskeller/packet/xscmsg/delivrcpt"
+	"github.com/rothskeller/packet/xscmsg/plaintext"
+	"github.com/rothskeller/packet/xscmsg/readrcpt"
 	"github.com/rothskeller/wppsvr/config"
 	"github.com/rothskeller/wppsvr/english"
 )

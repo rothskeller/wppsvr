@@ -2,8 +2,8 @@ package config
 
 import (
 	"github.com/rothskeller/packet/message"
-	"github.com/rothskeller/packet/message/eoc213rr"
-	"github.com/rothskeller/packet/message/ics213"
+	"github.com/rothskeller/packet/xscmsg/eoc213rr"
+	"github.com/rothskeller/packet/xscmsg/ics213"
 )
 
 // ComputeRecommendedHandlingOrder computes the recommended handling order for a

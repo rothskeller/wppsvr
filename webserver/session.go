@@ -14,7 +14,7 @@ import (
 
 	"github.com/rothskeller/packet/message"
 	"github.com/rothskeller/packet/message/common"
-	"github.com/rothskeller/packet/message/plaintext"
+	"github.com/rothskeller/packet/xscmsg/plaintext"
 	"github.com/rothskeller/wppsvr/config"
 	"github.com/rothskeller/wppsvr/htmlb"
 	"github.com/rothskeller/wppsvr/interval"

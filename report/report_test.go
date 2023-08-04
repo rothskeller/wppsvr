@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/rothskeller/packet/message/allmsg"
+	"github.com/rothskeller/packet/xscmsg/allmsg"
 	"github.com/rothskeller/wppsvr/store"
 )
 

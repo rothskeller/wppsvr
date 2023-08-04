@@ -11,7 +11,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/rothskeller/packet/message/allmsg"
+	"github.com/rothskeller/packet/xscmsg/allmsg"
 	"github.com/rothskeller/wppsvr/analyze"
 	"github.com/rothskeller/wppsvr/config"
 	"github.com/rothskeller/wppsvr/store"

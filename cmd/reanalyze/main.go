@@ -10,7 +10,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/rothskeller/packet/message/allmsg"
+	"github.com/rothskeller/packet/xscmsg/allmsg"
 	"github.com/rothskeller/wppsvr/analyze"
 	"github.com/rothskeller/wppsvr/config"
 	"github.com/rothskeller/wppsvr/report"
@@ -72,5 +72,5 @@ func (fs *filteredStore) NextMessageID(string) string {
 	return fs.id // return the ID that the message was given originally
 }
 func (fs *filteredStore) SaveMessage(m *store.Message) {
-	fs.SaveMessage(m)
+	fs.st.SaveMessage(m)
 }
