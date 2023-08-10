@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/mail"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -415,10 +416,10 @@ func emitBBSes(form *htmlb.Element, session *store.Session, focus bool, err stri
 		in.E("input type=checkbox id=retrieve.%s name=retrieve.%s", name, name, retrieve[name], "checked", focus && i == 0, "autofocus")
 		in.E("label for=retrieve.%s> Retrieve practice messages", name)
 		in.E("br")
-		in.E("input type=checkbox id=destbbs.%s name=destbbs.%s", name, name, inList(session.ToBBSes, name), "checked")
+		in.E("input type=checkbox id=destbbs.%s name=destbbs.%s", name, name, slices.Contains(session.ToBBSes, name), "checked")
 		in.E("label for=destbbs.%s> Accept retrieved practice messages", name)
 		in.E("br")
-		in.E("input type=checkbox id=downbbs.%s name=downbbs.%s", name, name, inList(session.DownBBSes, name), "checked")
+		in.E("input type=checkbox id=downbbs.%s name=downbbs.%s", name, name, slices.Contains(session.DownBBSes, name), "checked")
 		in.E("label for=downbbs.%s> Simulated outage", name)
 		in.E("br")
 		if i == 0 && err != "" {
@@ -502,7 +503,7 @@ func emitMsgTypes(form *htmlb.Element, session *store.Session, show, focus bool,
 	row := form.E("div id=mtypeRow class=formRow", !show, "style=display:none")
 	row.E("label>Message Type(s)")
 	in := row.E("div class=formInput")
-	in.E("input type=checkbox id=mtype.plain name=mtype value=plain", inList(session.MessageTypes, plaintext.Type.Tag), "checked", focus, "autofocus")
+	in.E("input type=checkbox id=mtype.plain name=mtype value=plain", slices.Contains(session.MessageTypes, plaintext.Type.Tag), "checked", focus, "autofocus")
 	in.E("label for=mtype.plain> Plain text message")
 	in.E("br")
 	var tags = make([]string, 0, len(message.RegisteredTypes))
@@ -515,7 +516,7 @@ func emitMsgTypes(form *htmlb.Element, session *store.Session, show, focus bool,
 		return capitalize(message.RegisteredTypes[tags[i]].Name) < capitalize(message.RegisteredTypes[tags[j]].Name)
 	})
 	for _, tag := range tags {
-		in.E("input type=checkbox id=mtype.%s name=mtype value=%s", tag, tag, inList(session.MessageTypes, tag), "checked")
+		in.E("input type=checkbox id=mtype.%s name=mtype value=%s", tag, tag, slices.Contains(session.MessageTypes, tag), "checked")
 		in.E("label for=mtype.%s> %s", tag, capitalize(message.RegisteredTypes[tag].Name))
 		in.E("br")
 	}
@@ -667,15 +668,6 @@ func emitButtons(form *htmlb.Element, session *store.Session) {
 		buttons.E("div class=formButtonSpace")
 		buttons.E("input type=submit name=delete class='sbtn sbtn-danger' value='Delete Session'")
 	}
-}
-
-func inList[T comparable](list []T, item T) bool {
-	for _, v := range list {
-		if v == item {
-			return true
-		}
-	}
-	return false
 }
 
 func capitalize(s string) string {

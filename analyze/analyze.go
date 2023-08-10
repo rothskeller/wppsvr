@@ -128,12 +128,3 @@ func (a *Analysis) Commit(st astore) {
 	}
 	log.Printf("=> %s %s %d", a.sm.LocalID, tag, a.sm.Score)
 }
-
-func inList[T comparable](list []T, item T) bool {
-	for _, i := range list {
-		if i == item {
-			return true
-		}
-	}
-	return false
-}

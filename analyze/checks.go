@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"html"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/rothskeller/packet/message"
@@ -65,12 +66,12 @@ func (a *Analysis) messageCounts(parseErr error) bool {
 		return false
 	}
 	// Check that it was sent to a correct BBS.
-	if inList(a.session.DownBBSes, a.sm.ToBBS) {
+	if slices.Contains(a.session.DownBBSes, a.sm.ToBBS) {
 		a.setSummary("message to incorrect BBS (simulated outage)")
 		fmt.Fprintf(a.analysis, "<h2>Message to Incorrect BBS</h2><p>This message was sent to %[1]s at %[2]s, but %[2]s has a simulated outage for %[3]s on %[4]s.  This message will not be counted.  Practice messages for this session must be sent to %[1]s at %[5]s.</p>",
 			a.session.CallSign, a.sm.ToBBS, html.EscapeString(a.session.Name), a.session.End.Format("January 2"),
 			english.Conjoin(a.session.ToBBSes, "or"))
-	} else if !inList(a.session.ToBBSes, a.sm.ToBBS) {
+	} else if !slices.Contains(a.session.ToBBSes, a.sm.ToBBS) {
 		a.setSummary("message to incorrect BBS")
 		fmt.Fprintf(a.analysis, "<h2>Message to Incorrect BBS</h2><p>This message was sent to %[1]s at %[2]s, but practice messages for %[3]s on %[4]s must be sent to %[1]s at %[5]s.  This message will not be counted.</p>",
 			a.session.CallSign, a.sm.ToBBS, html.EscapeString(a.session.Name), a.session.End.Format("January 2"),
@@ -148,7 +149,7 @@ func (a *Analysis) checkCorrectness() {
 	}
 	// Make sure the message came from a BBS that is up.
 	a.outOf++
-	if inList(a.session.DownBBSes, a.sm.FromBBS) {
+	if slices.Contains(a.session.DownBBSes, a.sm.FromBBS) {
 		a.setSummary("message from incorrect BBS (simulated outage)")
 		fmt.Fprintf(a.analysis, "<h2>Message from Incorrect BBS</h2><p>This message was sent from %s, which has a simulated outage for %s on %s.  Practice messages should not be sent from BBSes that have a simulated outage.</p>",
 			a.sm.FromBBS, html.EscapeString(a.session.Name), a.session.End.Format("January 2"))
@@ -290,13 +291,13 @@ func (a *Analysis) checkNonModel() {
 		mtc = config.Get().MessageTypes[a.mb.Type.Tag]
 		if len(mtc.ToICSPosition) != 0 {
 			a.outOf++
-			if badpos = !inList(mtc.ToICSPosition, *a.mb.FToICSPosition); !badpos {
+			if badpos = !slices.Contains(mtc.ToICSPosition, *a.mb.FToICSPosition); !badpos {
 				a.score++
 			}
 		}
 		if len(mtc.ToLocation) != 0 {
 			a.outOf++
-			if badloc = !inList(mtc.ToLocation, *a.mb.FToLocation); !badloc {
+			if badloc = !slices.Contains(mtc.ToLocation, *a.mb.FToLocation); !badloc {
 				a.score++
 			}
 		}
@@ -361,7 +362,7 @@ func (a *Analysis) checkNonModel() {
 		// problem gets reported elsewhere.
 		allowed = append(allowed, plaintext.Type.Tag)
 	}
-	if !inList(allowed, a.mb.Type.Tag) {
+	if !slices.Contains(allowed, a.mb.Type.Tag) {
 		var (
 			allowed []string
 			article string
@@ -437,7 +438,7 @@ func (a *Analysis) fixupRecRouteFields(score int, fields []*message.CompareField
 		case "To ICS Position":
 			if f.Expected == "" && len(mtc.ToICSPosition) != 0 {
 				f.ExpectedMask = "_"
-				if inList(mtc.ToICSPosition, f.Actual) {
+				if slices.Contains(mtc.ToICSPosition, f.Actual) {
 					f.Expected = f.Actual
 					score += f.OutOf - f.Score
 					f.Score = f.OutOf
@@ -454,7 +455,7 @@ func (a *Analysis) fixupRecRouteFields(score int, fields []*message.CompareField
 		case "To Location":
 			if f.Expected == "" && len(mtc.ToLocation) != 0 {
 				f.ExpectedMask = "_"
-				if inList(mtc.ToLocation, f.Actual) {
+				if slices.Contains(mtc.ToLocation, f.Actual) {
 					f.Expected = f.Actual
 					score += f.OutOf - f.Score
 					f.Score = f.OutOf
