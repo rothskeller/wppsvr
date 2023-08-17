@@ -38,7 +38,7 @@ func (ws *webserver) serveSessionList(w http.ResponseWriter, r *http.Request) {
 	html.E("link rel=stylesheet href=/static/common.css")
 	html.E("link rel=stylesheet href=/static/sessions.css")
 	html.E("div id=org>Santa Clara County ARES<sup>®</sup>/RACES")
-	html.E("div id=title>Weekly Packet Practice")
+	html.E("div id=title").E("a href=/>Weekly Packet Practice")
 	html.E("div id=subtitle>Practice Sessions Editor")
 	// Write the year selector.
 	yearsel := html.E("div id=year")

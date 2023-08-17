@@ -50,7 +50,7 @@ func (ws *webserver) serveCalendar(w http.ResponseWriter, r *http.Request) {
 	html.E("link rel=stylesheet href=/static/calendar.css")
 	html.E("script src=/static/calendar.js")
 	html.E("div id=org>Santa Clara County ARES<sup>®</sup>/RACES")
-	html.E("div id=title>Weekly Packet Practice")
+	html.E("div id=title").E("a href=/>Weekly Packet Practice")
 	html.E("div id=key>Click on any net date to see its report.")
 	// Write the view options.
 	if view == "counts" {

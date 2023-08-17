@@ -155,7 +155,7 @@ func (ws *webserver) serveSessionEdit(w http.ResponseWriter, r *http.Request) {
 	html.E("link rel=stylesheet href=/static/session.css")
 	html.E("script src=/static/session.js")
 	html.E("div id=org>Santa Clara County ARES<sup>®</sup>/RACES")
-	html.E("div id=title>Weekly Packet Practice")
+	html.E("div id=title").E("a href=/>Weekly Packet Practice")
 	html.E("div id=subtitle>Practice Session Editor")
 	// Write the form.
 	form := html.E("form class=form method=POST enctype=multipart/form-data")
