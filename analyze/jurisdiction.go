@@ -27,6 +27,7 @@ var jurisdictionMap = map[string]string{
 	"Los Altos":                         "LOS",
 	"Los Altos Hills":                   "LAH",
 	"Los Gatos":                         "LGT",
+	"Los Gatos/Monte Sereno":            "LGT", // per N6PWD 2023-08-20
 	"Marin County":                      "XMR",
 	"Milpitas":                          "MLP",
 	"Monte Sereno":                      "MSO",
