@@ -31,7 +31,7 @@ func main() {
 	if st, err = store.Open(); err != nil {
 		log.Fatal(err)
 	}
-	if len(os.Args) == 2 {
+	if len(os.Args) >= 2 {
 		date, _ := time.Parse("2006-01-02", os.Args[1])
 		if !date.IsZero() {
 			sessions := st.GetSessions(
@@ -49,9 +49,11 @@ func main() {
 	}
 	messages = st.GetSessionMessages(session.ID)
 	for _, message := range messages {
-		var fs = &filteredStore{st: st, id: message.LocalID}
-		analysis := analyze.Analyze(fs, session, message.ToBBS, message.Message)
-		analysis.Commit(fs)
+		if len(os.Args) == 2 || message.LocalID == os.Args[2] {
+			var fs = &filteredStore{st: st, id: message.LocalID}
+			analysis := analyze.Analyze(fs, session, message.ToBBS, message.Message)
+			analysis.Commit(fs)
+		}
 	}
 	if session.Flags&store.Running == 0 && session.Report != "" {
 		rpt := report.Generate(st, session)
