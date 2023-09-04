@@ -104,6 +104,11 @@ func (a *Analysis) messageCounts(parseErr error) bool {
 		// OpCall field; hopefully there's one there.
 		a.sm.FromCallSign = *a.mb.FOpCall
 	}
+	if a.sm.FromCallSign == "N6SBC" {
+		// Special case request from Timothy Takeuchi, 2023-09.
+		a.sm.FromCallSign = "XBEEOC"
+		a.sm.Jurisdiction = "XBE"
+	}
 	if a.sm.FromCallSign == "" {
 		a.setSummary("no call sign in message")
 		if a.mb.FOpCall != nil {
@@ -131,7 +136,7 @@ func (a *Analysis) checkCorrectness() {
 	if a.env.NotPlainText {
 		if strings.Contains(a.env.ReturnAddr, "winlink.org") {
 			a.setSummary("message sent from Winlink")
-			a.analysis.WriteString("<h2>Message Sent from Winlink</h2><p>This message was sent from Winlink.  Winlink should not be used for emergency communications, unless no alternatives are available, because it uses a message encoding system (“quoted-printable”) that Outpost cannot decode.  As a result, some messages (particularly those with long lines and those containing equals signs) may be garbled in transmission.</p>")
+			a.analysis.WriteString("<h2>Message Sent from Winlink</h2><p>This message was sent from Winlink.  Winlink should not be used for emergency communications in Santa Clara County, unless no alternatives are available, because it uses a message encoding system (“quoted-printable”) that Outpost cannot decode.  As a result, some messages (particularly those with long lines and those containing equals signs) may be garbled in transmission.</p>")
 		} else {
 			a.setSummary("not a plain text message")
 			a.analysis.WriteString("<h2>Not a Plain Text Message</h2><p>This message is not a plain text message. All SCCo packet messages should be plain text only.  (“Rich text” or HTML-formatted messages, common in email systems, are far larger than plain text messages and put too much strain on the packet infrastructure.)  Please configure your software to send plain text messages when sending to an SCCo BBS.</p>")
