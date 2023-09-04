@@ -10,6 +10,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rothskeller/packet v1.7.0 h1:flBSD/5A9bzo+alHcUgw7M+GcNCZBxz85IfKYnM8B0U=
 github.com/rothskeller/packet v1.7.0/go.mod h1:GgZ/SxJDg4FnPJ3FX6V6+FHBPgM2OVlQYOeRby5hqNU=
+github.com/rothskeller/packet v1.7.3 h1:Ys4YaukKUVCzw3QB3JbNhLS+3bLdoqAo5JSpH3clycI=
+github.com/rothskeller/packet v1.7.3/go.mod h1:GgZ/SxJDg4FnPJ3FX6V6+FHBPgM2OVlQYOeRby5hqNU=
 github.com/rothskeller/pdf v1.1.1 h1:n1Sld8m+CqI+T62ip/0FtHW7yk27cyepgy+XQD3wGlQ=
 github.com/rothskeller/pdf v1.1.1/go.mod h1:LVIMDkp7uQUg7KbvPITMJKZstZO53+X92QQSFM+pwHY=
 github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
