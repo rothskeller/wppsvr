@@ -6,7 +6,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/go-test/deep v1.0.8
 	github.com/mattn/go-sqlite3 v1.14.12
-	github.com/rothskeller/packet v1.8.0
+	github.com/rothskeller/packet v1.8.2
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
 
