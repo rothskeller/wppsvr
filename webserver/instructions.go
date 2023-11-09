@@ -101,9 +101,9 @@ func (ws *webserver) serveInstructions(w http.ResponseWriter, r *http.Request) {
 	if msg, ok := session.ModelMsg.(*plaintext.PlainText); ok {
 		grid := main.E("div id=plainmodel")
 		grid.E("div>Subject:")
-		grid.E("div>%s", msg.Subject)
+		grid.E("div>%s", strings.ReplaceAll(msg.Subject, "¡", ""))
 		grid.E("div>Message:")
-		grid.E("div>%s", msg.Body)
+		grid.E("div>%s", strings.ReplaceAll(msg.Body, "¡", ""))
 	}
 	main.E("p style=margin-bottom:0>The following references may be helpful to you:")
 	list := main.E("ul style=margin-top:0")
