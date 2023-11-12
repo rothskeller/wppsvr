@@ -34,7 +34,7 @@ var (
 	// ".ampr.org" or a ".#" BBS network domain.
 	fromBBSRE = regexp.MustCompile(`(?i)^[^%@]+[%@](A[A-L][0-9][A-Z]{1,3}|[KNW][A-Z][0-9][A-Z]{1,3}|[KNW][0-9][A-Z]{2,3})(?:\.ampr\.org(?:@.*)?|\.#.*)?$`)
 	// msgnumRE matches a valid packet message number.
-	msgnumRE = regexp.MustCompile(`^(?:[A-Z][A-Z][A-Z]|[A-Z][0-9][A-Z0-9]|[0-9][A-Z][A-Z])-\d\d\d+[PMR]$`)
+	msgnumRE = regexp.MustCompile(`^(?:[A-Z][A-Z][A-Z]|[A-Z][0-9][A-Z0-9]|[0-9][A-Z][A-Z])-\d\d\d+[AC-HJ-NPR-Y]$`)
 )
 
 // messageCounts returns whether the message should be counted as a check-in.
