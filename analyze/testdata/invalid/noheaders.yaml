@@ -9,4 +9,4 @@ stored:
   summary: message could not be parsed
 analysisREs:
   - RFC-5322
-  - malformed MIME header
+  - malformed header line

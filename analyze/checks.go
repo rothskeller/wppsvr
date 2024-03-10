@@ -31,8 +31,8 @@ var (
 	// fromBBSRE matches a return address from a BBS, and returns the BBS
 	// name.  It is the first word of the address domain, as long as that
 	// address looks like a call sign and the rest of the domain is
-	// ".ampr.org" or a ".#" BBS network domain.
-	fromBBSRE = regexp.MustCompile(`(?i)^[^%@]+[%@](A[A-L][0-9][A-Z]{1,3}|[KNW][A-Z][0-9][A-Z]{1,3}|[KNW][0-9][A-Z]{2,3})(?:\.ampr\.org(?:@.*)?|\.#.*)?$`)
+	// ".ampr.org", ".scc-ares-races.org", or a ".#" BBS network domain.
+	fromBBSRE = regexp.MustCompile(`(?i)^[^%@]+[%@](A[A-L][0-9][A-Z]{1,3}|[KNW][A-Z][0-9][A-Z]{1,3}|[KNW][0-9][A-Z]{2,3})(?:\.(?:ampr|scc-ares-races)\.org(?:@.*)?|\.#.*)?$`)
 	// msgnumRE matches a valid packet message number.
 	msgnumRE = regexp.MustCompile(`^(?:[A-Z][A-Z][A-Z]|[A-Z][0-9][A-Z0-9]|[0-9][A-Z][A-Z])-\d\d\d+[AC-HJ-NPR-Y]$`)
 )
