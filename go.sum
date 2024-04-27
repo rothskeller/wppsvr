@@ -16,6 +16,8 @@ github.com/rothskeller/packet v1.8.4 h1:ePAif4gcCwFAUgSnkckMf2GKr94a1BhbwgE91Y9V
 github.com/rothskeller/packet v1.8.4/go.mod h1:3DN0p9HaNF5UgOHu2EgMugwbgz+NbJzNmzrtV62nvHs=
 github.com/rothskeller/packet v1.8.6 h1:stWbGYYO5R06lODDiY9I4SKB7xg4n4wMhlm6lvPETts=
 github.com/rothskeller/packet v1.8.6/go.mod h1:3DN0p9HaNF5UgOHu2EgMugwbgz+NbJzNmzrtV62nvHs=
+github.com/rothskeller/packet v1.8.7 h1:GddnobdsdigQKmOuY6KXtNMRQvaraouYEsN5VrsszbM=
+github.com/rothskeller/packet v1.8.7/go.mod h1:3DN0p9HaNF5UgOHu2EgMugwbgz+NbJzNmzrtV62nvHs=
 github.com/rothskeller/pdf v1.2.0 h1:EwDK/pW5XHyeRjYSrXkDUJROF1MyRZ2Nco6n9ejTPPc=
 github.com/rothskeller/pdf v1.2.0/go.mod h1:LVIMDkp7uQUg7KbvPITMJKZstZO53+X92QQSFM+pwHY=
 github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
