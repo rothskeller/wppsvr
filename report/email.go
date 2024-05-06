@@ -124,7 +124,7 @@ func (r *Report) emailStatistics(w *quotedprintable.Writer) {
 		var rows = (len(r.Jurisdictions) + cols - 1) / cols
 		io.WriteString(w, `<td style="padding-left:32px;vertical-align:top"><div style="max-width:640px;margin-bottom:24px"><div style="font-size:20px;font-weight:bold;color:#444">Jurisdictions</div><table cellspacing="0" cellpadding="0"><tr>`)
 		for col := 0; col < len(r.Jurisdictions); col += rows {
-			io.WriteString(w, `<td style="vertical-align:top"><table cellspacing="0" cellpadding="0">`)
+			io.WriteString(w, `<td style="vertical-align:top;padding-right:16px"><table cellspacing="0" cellpadding="0">`)
 			for i := col; i < len(r.Jurisdictions) && i < col+rows; i++ {
 				fmt.Fprintf(w, `<tr><td style="padding-top:2px;color:#666">%s</td><td style="padding:2px 0 0 16px;text-align:right">%d</td></tr>`, html.EscapeString(r.Jurisdictions[i].Name), r.Jurisdictions[i].Count)
 			}
