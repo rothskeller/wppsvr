@@ -42,6 +42,7 @@ var jurisdictionMap = map[string]string{
 	"San Jose Water Co":                 "SJW",
 	"San Mateo County":                  "XSM",
 	"Santa Clara":                       "SNC",
+	"Santa Clara City":                  "SNC",
 	"Santa Clara County":                "XSC",
 	"Santa Clara Valley Water District": "VWD",
 	"Santa Cruz County":                 "XCZ",
