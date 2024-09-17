@@ -20,6 +20,8 @@ github.com/rothskeller/packet v1.8.7 h1:GddnobdsdigQKmOuY6KXtNMRQvaraouYEsN5Vrss
 github.com/rothskeller/packet v1.8.7/go.mod h1:3DN0p9HaNF5UgOHu2EgMugwbgz+NbJzNmzrtV62nvHs=
 github.com/rothskeller/packet v1.8.8 h1:xJ2+fHaQz9ej6EGphsCDvGDXAKWtXiIZNtyg4X4pjAs=
 github.com/rothskeller/packet v1.8.8/go.mod h1:3DN0p9HaNF5UgOHu2EgMugwbgz+NbJzNmzrtV62nvHs=
+github.com/rothskeller/packet v1.9.0 h1:B6i35NpGnz3OIbFMFTOKuhroQpe0QG5ZhDAEn41ShSk=
+github.com/rothskeller/packet v1.9.0/go.mod h1:ar3NzPfBlXocCwfaVjyhvY+AaEPCV1uqVszDw5PThNo=
 github.com/rothskeller/pdf v1.2.0 h1:EwDK/pW5XHyeRjYSrXkDUJROF1MyRZ2Nco6n9ejTPPc=
 github.com/rothskeller/pdf v1.2.0/go.mod h1:LVIMDkp7uQUg7KbvPITMJKZstZO53+X92QQSFM+pwHY=
 github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
@@ -28,6 +30,7 @@ go.bug.st/serial v1.6.0 h1:mAbRGN4cKE2J5gMwsMHC2KQisdLRQssO9WSM+rbZJ8A=
 go.bug.st/serial v1.6.0/go.mod h1:UABfsluHAiaNI+La2iESysd9Vetq7VRdpxvjx7CmmOE=
 golang.org/x/exp v0.0.0-20230725093048-515e97ebf090 h1:Di6/M8l0O2lCLc6VVRWhgCiApHV8MnQurBnFSHsQtNY=
 golang.org/x/exp v0.0.0-20230725093048-515e97ebf090/go.mod h1:FXUEEKJgO7OQYeo8N01OfiKP8RXMtf6e8aTskBGqWdc=
+golang.org/x/exp v0.0.0-20240808152545-0cdaa3abc0fa/go.mod h1:akd2r19cwCdwSwWeIdzYQGa/EZZyqcOdwWiwj5L5eKQ=
 golang.org/x/sys v0.10.0 h1:SqMFp9UcQJZa+pmYuAKjd9xq1f0j5rLcDIk0mj4qAsA=
 golang.org/x/sys v0.10.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
