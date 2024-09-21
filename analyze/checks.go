@@ -201,6 +201,20 @@ func (a *Analysis) checkCorrectness() {
 		} else {
 			a.score++
 		}
+		// Make sure the form didn't have any spurious fields.
+		a.outOf++
+		if len(a.mb.UnknownFields) != 0 {
+			a.setSummary("form has extra fields")
+			if len(a.mb.UnknownFields) == 1 {
+				fmt.Fprintf(a.analysis, "<h2>Form Has Extra Fields</h2><p>This message contains an extra field (%s) which is not expected in version %s of the %s.",
+					a.mb.UnknownFields[0], a.mb.Type.Version, html.EscapeString(a.mb.Type.Name))
+			} else {
+				fmt.Fprintf(a.analysis, "<h2>Form Has Extra Fields</h2><p>This message contains extra fields (%s) which are not expected in version %s of the %s.",
+					strings.Join(a.mb.UnknownFields, ", "), a.mb.Type.Version, html.EscapeString(a.mb.Type.Name))
+			}
+		} else {
+			a.score++
+		}
 		a.checkMessageNumber()
 	} else { // checks for plain text messages (or forms of unknown type)
 		// Check the message subject format.

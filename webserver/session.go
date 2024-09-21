@@ -603,6 +603,9 @@ func readFormBody(r *http.Request, session *store.Session, show bool) string {
 	if _, ok := form.(*plaintext.PlainText); ok {
 		return "This is not a valid PackItForms-encoded form."
 	}
+	if len(form.Base().UnknownFields) != 0 {
+		return "This form contains fields that are not valid for its type and version."
+	}
 	return ""
 }
 func emitFormBody(form *htmlb.Element, session *store.Session, show, focus bool, err string) {
