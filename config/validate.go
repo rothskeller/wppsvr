@@ -34,7 +34,7 @@ func (c *Config) Validate() (valid bool) {
 			log.Printf("ERROR: config.bbses[%q].transport is not specified", bbsCall)
 			valid = false
 		case "disable":
-			break
+			// nothing
 		case "kpc3plus":
 			if bbsConf.AX25 == "" {
 				log.Printf("ERROR: config.bbses[%q].ax25 is not specified", bbsCall)
@@ -91,7 +91,7 @@ func (c *Config) Validate() (valid bool) {
 			}
 			switch mtc.HandlingOrder {
 			case "", "IMMEDIATE", "PRIORITY", "ROUTINE":
-				break
+				// nothing
 			case "computed":
 				if tag != "ICS213" && tag != "EOC213RR" {
 					log.Printf("ERROR: config.messageTypes[%q].handlingOrder = %q, but that form has no handling order computation defined", tag, mtc.HandlingOrder)

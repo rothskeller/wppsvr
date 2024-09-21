@@ -169,7 +169,7 @@ func (ws *webserver) serveSessionEdit(w http.ResponseWriter, r *http.Request) {
 	emitReportToHTML(form, session, reportToHTMLError != "", reportToHTMLError)
 	emitBBSes(form, session, bbsError != "", bbsError)
 	emitRetrievals(form, session, retrievalsError != "", retrievalsError)
-	emitMessage(form, session, mtype)
+	emitMessage(form, mtype)
 	emitMsgTypes(form, session, mtype == "any", msgTypesError != "", msgTypesError)
 	emitPlainSubject(form, session, mtype == "plain", plainSubjectError != "", plainSubjectError)
 	emitPlainBody(form, session, mtype == "plain", plainBodyError != "", plainBodyError)
@@ -201,7 +201,7 @@ func emitStart(form *htmlb.Element, date, time string, focus bool, err string) {
 	row := form.E("div class='formRow sessionStart'")
 	row.E("label for=startDate>Start at")
 	dt := row.E("div class='formInput formRange'")
-	dt.E("input type=date id=startDate name=startDate value=%s", date)
+	dt.E("input type=date id=startDate name=startDate value=%s", date, focus, "autofocus")
 	dt.E("input type=time id=startTime name=startTime value=%s step=300", time)
 	if err != "" {
 		row.E("div class=formError>%s", err)
@@ -240,7 +240,7 @@ func emitEnd(form *htmlb.Element, date, time string, focus bool, err string) {
 	row := form.E("div class='formRow sessionEnd'")
 	row.E("label for=endDate>End at")
 	dt := row.E("div class='formInput formRange'")
-	dt.E("input type=date id=endDate name=endDate value=%s", date)
+	dt.E("input type=date id=endDate name=endDate value=%s", date, focus, "autofocus")
 	dt.E("input type=time id=endTime name=endTime value=%s step=300", time)
 	if err != "" {
 		row.E("div class=formError>%s", err)
@@ -469,7 +469,7 @@ func readMessage(r *http.Request) string {
 		return "any"
 	}
 }
-func emitMessage(form *htmlb.Element, session *store.Session, mtype string) {
+func emitMessage(form *htmlb.Element, mtype string) {
 	row := form.E("div class=formRow")
 	row.E("label for=messageAny>Message to Send")
 	in := row.E("div class=formInput")
@@ -513,11 +513,11 @@ func emitMsgTypes(form *htmlb.Element, session *store.Session, show, focus bool,
 		}
 	}
 	sort.Slice(tags, func(i, j int) bool {
-		return capitalize(message.RegisteredTypes[tags[i]].Name) < capitalize(message.RegisteredTypes[tags[j]].Name)
+		return capitalize(message.RegisteredTypes[tags[i]][0].Name) < capitalize(message.RegisteredTypes[tags[j]][0].Name)
 	})
 	for _, tag := range tags {
 		in.E("input type=checkbox id=mtype.%s name=mtype value=%s", tag, tag, slices.Contains(session.MessageTypes, tag), "checked")
-		in.E("label for=mtype.%s> %s", tag, capitalize(message.RegisteredTypes[tag].Name))
+		in.E("label for=mtype.%s> %s", tag, capitalize(message.RegisteredTypes[tag][0].Name))
 		in.E("br")
 	}
 	if err != "" {

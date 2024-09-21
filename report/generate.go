@@ -28,7 +28,7 @@ func Generate(st Store, session *store.Session) *Report {
 	generateParams(&r, session)
 	generateStatistics(&r, session, messages)
 	generateWeekSummary(&r, st, session)
-	generateMessages(&r, session, messages)
+	generateMessages(&r, messages)
 	generateGenInfo(&r, session)
 	generateParticipants(&r, messages)
 	return &r
@@ -65,7 +65,7 @@ func generateParams(r *Report, session *store.Session) {
 	} else {
 		for _, id := range session.MessageTypes {
 			if mt := message.RegisteredTypes[id]; mt != nil {
-				r.MessageTypes = append(r.MessageTypes, mt.Name)
+				r.MessageTypes = append(r.MessageTypes, mt[0].Name)
 			} else {
 				r.MessageTypes = append(r.MessageTypes, id)
 			}
@@ -232,7 +232,7 @@ func wasSimulatedDown(session *store.Session, bbs string) bool {
 
 // generateMessages generates the lists of valid and invalid check-in messages
 // that appear in the report.
-func generateMessages(r *Report, session *store.Session, messages []*store.Message) {
+func generateMessages(r *Report, messages []*store.Message) {
 	var multiple map[string]bool
 
 	messages, multiple = removeReplaced(messages)

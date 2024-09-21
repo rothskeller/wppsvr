@@ -56,9 +56,9 @@ func (ws *webserver) serveInstructions(w http.ResponseWriter, r *http.Request) {
 			}
 			if mt := message.RegisteredTypes[tag]; mt != nil {
 				if i == 0 {
-					article = mt.Article
+					article = mt[0].Article
 				}
-				names = append(names, mt.Name)
+				names = append(names, mt[0].Name)
 			} else {
 				if i == 0 {
 					article = "a"

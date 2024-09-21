@@ -194,10 +194,10 @@ func (a *Analysis) checkCorrectness() {
 		} else {
 			a.score++
 		}
-		if message.OlderVersion(a.mb.Form.Version, minForm) {
+		if message.OlderVersion(a.mb.Type.Version, minForm) {
 			a.setSummary("form version out of date")
 			fmt.Fprintf(a.analysis, "<h2>Form Version Out of Date</h2><p>This message contains version %s of the %s, but that version is not current.  Please use version %s or newer of the form.  (You can get the newer form by updating your PackItForms installation.)",
-				a.mb.Form.Version, html.EscapeString(a.mb.Type.Name), minForm)
+				a.mb.Type.Version, html.EscapeString(a.mb.Type.Name), minForm)
 		} else {
 			a.score++
 		}
@@ -373,7 +373,7 @@ func (a *Analysis) checkNonModel() {
 			article string
 		)
 		for i, code := range a.session.MessageTypes {
-			mtype := message.RegisteredTypes[code]
+			mtype := message.RegisteredTypes[code][0]
 			allowed = append(allowed, html.EscapeString(mtype.Name))
 			if i == 0 {
 				article = mtype.Article

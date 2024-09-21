@@ -2,32 +2,40 @@ package config
 
 import (
 	"github.com/rothskeller/packet/message"
-	"github.com/rothskeller/packet/xscmsg/eoc213rr"
-	"github.com/rothskeller/packet/xscmsg/ics213"
 )
 
 // ComputeRecommendedHandlingOrder computes the recommended handling order for a
 // message.  Only message types with computed (non-static) recommended handling
 // orders are handled by this function.
 func ComputeRecommendedHandlingOrder(msg message.Message) string {
-	switch msg := msg.(type) {
-	case *ics213.ICS213:
-		switch msg.Severity {
-		case "EMERGENCY":
-			return "IMMEDIATE"
-		case "URGENT":
-			return "PRIORITY"
-		case "OTHER":
-			return "ROUTINE"
+	switch msg.Base().Type.Tag {
+	case "ICS213":
+		for _, f := range msg.Base().Fields {
+			if f.Label == "Severity" {
+				switch *f.Value {
+				case "EMERGENCY":
+					return "IMMEDIATE"
+				case "URGENT":
+					return "PRIORITY"
+				case "OTHER":
+					return "ROUTINE"
+				}
+				break
+			}
 		}
-	case *eoc213rr.EOC213RR:
-		switch msg.Priority {
-		case "Now", "High":
-			return "IMMEDIATE"
-		case "Medium":
-			return "PRIORITY"
-		case "Low":
-			return "ROUTINE"
+	case "EOC213RR":
+		for _, f := range msg.Base().Fields {
+			if f.Label == "Priority" {
+				switch *f.Value {
+				case "Now", "High":
+					return "IMMEDIATE"
+				case "Medium":
+					return "PRIORITY"
+				case "Low":
+					return "ROUTINE"
+				}
+				break
+			}
 		}
 	}
 	return ""
