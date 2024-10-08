@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/rothskeller/packet/envelope"
 	"github.com/rothskeller/packet/message"
 	"github.com/rothskeller/packet/xscmsg/plaintext"
 	"github.com/rothskeller/wppsvr/config"
@@ -599,7 +600,7 @@ func readFormBody(r *http.Request, session *store.Session, show bool) string {
 	if body == "" {
 		return "The encoded form body is required."
 	}
-	form := message.Decode("", body)
+	form := message.Decode(new(envelope.Envelope), body)
 	if _, ok := form.(*plaintext.PlainText); ok {
 		return "This is not a valid PackItForms-encoded form."
 	}

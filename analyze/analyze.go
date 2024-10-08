@@ -80,7 +80,7 @@ func Analyze(st astore, session *store.Session, bbs, raw string) *Analysis {
 	a.sm.LocalID = st.NextMessageID(a.session.Prefix)
 	// Determine the message type (if no parse error and not a bounce).
 	if err == nil && !a.env.Autoresponse {
-		a.msg = message.Decode(a.subject, a.body)
+		a.msg = message.Decode(a.env, a.body)
 		a.mb = a.msg.Base()
 		a.sm.MessageType = a.mb.Type.Tag
 	}

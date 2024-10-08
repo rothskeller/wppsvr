@@ -144,7 +144,7 @@ func (s *Store) getSessionsWhere(where string, args ...interface{}) (list []*Ses
 		session.RetrieveInterval = interval.Parse(session.RetrieveAt)
 		if session.ModelMessage != "" {
 			if env, body, err := envelope.ParseSaved(session.ModelMessage); err == nil {
-				session.ModelMsg = message.Decode(env.SubjectLine, body)
+				session.ModelMsg = message.Decode(env, body)
 			} else {
 				panic(err)
 			}
