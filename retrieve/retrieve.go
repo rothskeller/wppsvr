@@ -4,7 +4,6 @@ package retrieve
 
 import (
 	"log"
-	"sync"
 	"time"
 
 	"github.com/rothskeller/packet/jnos"
@@ -15,20 +14,11 @@ import (
 	"github.com/rothskeller/wppsvr/store"
 )
 
-// serialRetrievals is false in production, allowing retrievals from multiple
-// BBSes to proceed in parallel.  It can be set to true for debugging.
-const serialRetrievals = false
-
-// serialMutex is used to enforce serial retrievals if enabled.
-var serialMutex sync.Mutex
-
 // ForRunningSessions retrieves and responds to new messages in all running
 // practice sessions.
 func ForRunningSessions(st *store.Store) {
-	var (
-		wg  sync.WaitGroup
-		now = time.Now()
-	)
+	now := time.Now()
+
 	for _, session := range st.GetRunningSessions() {
 		for _, ret := range session.Retrieve {
 			point := now
@@ -41,21 +31,17 @@ func ForRunningSessions(st *store.Store) {
 				point = point.Add(-time.Minute)
 			}
 			if point.After(ret.LastRun) {
-				wg.Add(1)
-				go checkBBS(st, &wg, session, ret)
+				checkBBS(st, session, ret)
 			}
 		}
 	}
-	wg.Wait()
 }
 
 // ForSession retrieves and responds to new messages in the specified practice
 // session.
 func ForSession(st *store.Store, session *store.Session) {
-	var (
-		wg  sync.WaitGroup
-		now = time.Now()
-	)
+	now := time.Now()
+
 	for _, ret := range session.Retrieve {
 		point := now
 		if point.Equal(point.Truncate(time.Minute)) {
@@ -67,26 +53,19 @@ func ForSession(st *store.Store, session *store.Session) {
 			point = point.Add(-time.Minute)
 		}
 		if point.After(ret.LastRun) {
-			wg.Add(1)
-			go checkBBS(st, &wg, session, ret)
+			checkBBS(st, session, ret)
 		}
 	}
-	wg.Wait()
 }
 
 // checkBBS retrieves and responds to new check-in messages on a specific BBS.
-func checkBBS(st *store.Store, wg *sync.WaitGroup, session *store.Session, retrieval *store.Retrieval) {
+func checkBBS(st *store.Store, session *store.Session, retrieval *store.Retrieval) {
 	var (
 		conn   *jnos.Conn
 		err    error
 		msgnum = 1
 		start  = time.Now()
 	)
-	defer wg.Done()
-	if serialRetrievals {
-		serialMutex.Lock()
-		defer serialMutex.Unlock()
-	}
 	if conn = ConnectToBBS(retrieval.BBS, session.CallSign); conn == nil {
 		return
 	}

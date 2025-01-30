@@ -23,7 +23,7 @@ func (ws *webserver) serveLogin(w http.ResponseWriter, r *http.Request) {
 	token := randomToken()
 	callsign = strings.ToUpper(callsign)
 	ws.st.AddLogin(token, callsign, time.Now().Add(time.Hour))
-	http.SetCookie(w, &http.Cookie{Name: "auth", Value: token, Path: "/" /*, Secure: true  TODO */})
+	http.SetCookie(w, &http.Cookie{Name: "auth", Value: token, Path: "/", Secure: true})
 	w.WriteHeader(http.StatusNoContent)
 }
 
