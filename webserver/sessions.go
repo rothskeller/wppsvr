@@ -16,7 +16,7 @@ func (ws *webserver) serveSessionList(w http.ResponseWriter, r *http.Request) {
 		callsign string
 		year     = time.Now().Year()
 	)
-	if callsign = checkLoggedIn(w, r); callsign == "" {
+	if callsign = ws.checkLoggedIn(w, r); callsign == "" {
 		return
 	}
 	if !canEditSessions(callsign) {

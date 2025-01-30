@@ -20,7 +20,7 @@ func (ws *webserver) serveMessage(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		if callsign = checkLoggedIn(w, r); callsign == "" {
+		if callsign = ws.checkLoggedIn(w, r); callsign == "" {
 			return
 		}
 		if msg = ws.st.GetMessage(r.FormValue("id")); msg == nil {
@@ -48,7 +48,7 @@ func (ws *webserver) serveMessage(w http.ResponseWriter, r *http.Request) {
 	body := html.E("div id=results")
 	// Display the summary.
 	lr := body.E("div id=lr")
-	var fromcall = msg.FromCallSign
+	fromcall := msg.FromCallSign
 	if strings.HasPrefix(strings.ToUpper(msg.FromAddress), fromcall) {
 		fromcall = ""
 	}

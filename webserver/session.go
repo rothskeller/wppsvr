@@ -50,7 +50,7 @@ func (ws *webserver) serveSessionEdit(w http.ResponseWriter, r *http.Request) {
 		formImages        []*multipart.FileHeader
 		formImageError    string
 	)
-	if callsign = checkLoggedIn(w, r); callsign == "" {
+	if callsign = ws.checkLoggedIn(w, r); callsign == "" {
 		return
 	}
 	if !canEditSessions(callsign) {
@@ -198,6 +198,7 @@ func readStart(r *http.Request, session *store.Session) (datestr, timestr, err s
 	session.Start, _ = time.ParseInLocation("2006-01-02 15:04", datestr+" "+timestr, time.Local)
 	return datestr, timestr, ""
 }
+
 func emitStart(form *htmlb.Element, date, time string, focus bool, err string) {
 	row := form.E("div class='formRow sessionStart'")
 	row.E("label for=startDate>Start at")
@@ -237,6 +238,7 @@ func (ws *webserver) readEnd(r *http.Request, session *store.Session) (datestr, 
 	}
 	return datestr, timestr, ""
 }
+
 func emitEnd(form *htmlb.Element, date, time string, focus bool, err string) {
 	row := form.E("div class='formRow sessionEnd'")
 	row.E("label for=endDate>End at")
@@ -255,6 +257,7 @@ func readName(r *http.Request, session *store.Session) string {
 	}
 	return ""
 }
+
 func emitName(form *htmlb.Element, session *store.Session, focus bool, err string) {
 	row := form.E("div class='formRow sessionName'")
 	row.E("label for=sessionName>Session name")
@@ -275,6 +278,7 @@ func readCallSign(r *http.Request, session *store.Session) string {
 	}
 	return ""
 }
+
 func emitCallSign(form *htmlb.Element, session *store.Session, focus bool, err string) {
 	row := form.E("div class='formRow callsign'")
 	row.E("label for=callsign>Call sign")
@@ -295,6 +299,7 @@ func readPrefix(r *http.Request, session *store.Session) string {
 	}
 	return ""
 }
+
 func emitPrefix(form *htmlb.Element, session *store.Session, focus bool, err string) {
 	row := form.E("div class='formRow prefix'")
 	row.E("label for=prefix>Message number prefix")
@@ -312,6 +317,7 @@ func readExcludeFromWeek(r *http.Request, session *store.Session) {
 		session.Flags &^= store.ExcludeFromWeek
 	}
 }
+
 func emitExcludeFromWeek(form *htmlb.Element, session *store.Session) {
 	row := form.E("div class='formRow exclude'")
 	row.E("label for=exclude>Exclude from Week")
@@ -334,6 +340,7 @@ func readReportToText(r *http.Request, session *store.Session) (err string) {
 	}
 	return err
 }
+
 func emitReportToText(form *htmlb.Element, session *store.Session, focus bool, err string) {
 	row := form.E("div class='formRow reportToText'")
 	row.E("label for=reportToText class=textareaLabel>Packet Reports")
@@ -356,6 +363,7 @@ func readReportToHTML(r *http.Request, session *store.Session) (err string) {
 	}
 	return err
 }
+
 func emitReportToHTML(form *htmlb.Element, session *store.Session, focus bool, err string) {
 	row := form.E("div class='formRow reportToHTML'")
 	row.E("label for=reportToHTML>Email Reports")
@@ -368,8 +376,8 @@ func emitReportToHTML(form *htmlb.Element, session *store.Session, focus bool, e
 
 func readBBSes(r *http.Request, session *store.Session) string {
 	session.ToBBSes, session.DownBBSes = session.ToBBSes[:0], session.DownBBSes[:0]
-	var bbsnames = make([]string, 0, len(config.Get().BBSes))
-	var retrieve = make(map[string]*store.Retrieval)
+	bbsnames := make([]string, 0, len(config.Get().BBSes))
+	retrieve := make(map[string]*store.Retrieval)
 	for name := range config.Get().BBSes {
 		bbsnames = append(bbsnames, name)
 	}
@@ -400,9 +408,10 @@ func readBBSes(r *http.Request, session *store.Session) string {
 	}
 	return ""
 }
+
 func emitBBSes(form *htmlb.Element, session *store.Session, focus bool, err string) {
-	var bbsnames = make([]string, 0, len(config.Get().BBSes))
-	var retrieve = make(map[string]bool)
+	bbsnames := make([]string, 0, len(config.Get().BBSes))
+	retrieve := make(map[string]bool)
 	for name := range config.Get().BBSes {
 		bbsnames = append(bbsnames, name)
 	}
@@ -446,6 +455,7 @@ func readRetrievals(r *http.Request, session *store.Session) string {
 	}
 	return ""
 }
+
 func emitRetrievals(form *htmlb.Element, session *store.Session, focus bool, err string) {
 	row := form.E("div class=formRow")
 	row.E("label for=reportToText class=textareaLabel>Retrieval Schedule")
@@ -470,6 +480,7 @@ func readMessage(r *http.Request) string {
 		return "any"
 	}
 }
+
 func emitMessage(form *htmlb.Element, mtype string) {
 	row := form.E("div class=formRow")
 	row.E("label for=messageAny>Message to Send")
@@ -500,6 +511,7 @@ func readMsgTypes(r *http.Request, session *store.Session, show bool) string {
 	}
 	return ""
 }
+
 func emitMsgTypes(form *htmlb.Element, session *store.Session, show, focus bool, err string) {
 	row := form.E("div id=mtypeRow class=formRow", !show, "style=display:none")
 	row.E("label>Message Type(s)")
@@ -507,7 +519,7 @@ func emitMsgTypes(form *htmlb.Element, session *store.Session, show, focus bool,
 	in.E("input type=checkbox id=mtype.plain name=mtype value=plain", slices.Contains(session.MessageTypes, plaintext.Type.Tag), "checked", focus, "autofocus")
 	in.E("label for=mtype.plain> Plain text message")
 	in.E("br")
-	var tags = make([]string, 0, len(message.RegisteredTypes))
+	tags := make([]string, 0, len(message.RegisteredTypes))
 	for tag := range message.RegisteredTypes {
 		if tag != plaintext.Type.Tag && config.Get().MessageTypes[tag] != nil {
 			tags = append(tags, tag)
@@ -544,6 +556,7 @@ func readPlainSubject(r *http.Request, session *store.Session, show bool) string
 	}
 	return ""
 }
+
 func emitPlainSubject(form *htmlb.Element, session *store.Session, show, focus bool, err string) {
 	var subject string
 
@@ -576,6 +589,7 @@ func readPlainBody(session *store.Session, show bool) string {
 	}
 	return ""
 }
+
 func emitPlainBody(form *htmlb.Element, session *store.Session, show, focus bool, err string) {
 	var body string
 
@@ -609,6 +623,7 @@ func readFormBody(r *http.Request, session *store.Session, show bool) string {
 	}
 	return ""
 }
+
 func emitFormBody(form *htmlb.Element, session *store.Session, show, focus bool, err string) {
 	var body string
 
@@ -633,6 +648,7 @@ func (ws *webserver) readFormImage(r *http.Request, session *store.Session, show
 	}
 	return r.MultipartForm.File["formImage"], ""
 }
+
 func (ws *webserver) emitFormImage(form *htmlb.Element, session *store.Session, show, focus bool, err string) {
 	row := form.E("div id=formImageRow class=formRow", !show, "style=display:none")
 	count := ws.st.ModelImageCount(session.ID)
@@ -656,6 +672,7 @@ func (ws *webserver) emitFormImage(form *htmlb.Element, session *store.Session, 
 func readInstructions(r *http.Request, session *store.Session) {
 	session.Instructions = strings.TrimSpace(removeCR.Replace(r.FormValue("instructions")))
 }
+
 func emitInstructions(form *htmlb.Element, session *store.Session) {
 	row := form.E("div class=formRow")
 	row.E("label for=instructions>Extra Instructions")

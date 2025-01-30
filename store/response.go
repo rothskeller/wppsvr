@@ -1,9 +1,12 @@
 package store
 
 import (
-	"database/sql"
 	"time"
+
+	"github.com/rothskeller/wppsvr/db"
 )
+
+const sendTimeFormat = "2006-01-02 15:04:05.999999999-07:00"
 
 // A Response is an outgoing message that responds to a received message.
 type Response struct {
@@ -19,40 +22,39 @@ type Response struct {
 
 // GetResponses retrieves the responses for the specified message.
 func (st *Store) GetResponses(to string) (responses []*Response) {
-	var (
-		rows *sql.Rows
-		err  error
-	)
-	st.mutex.RLock()
-	defer st.mutex.RUnlock()
-	rows, err = st.dbh.Query(`SELECT id, sendto, subject, body, sendtime, sendercall, senderbbs FROM response WHERE responseto=? ORDER BY id`, to)
-	if err != nil {
-		panic(err)
-	}
-	for rows.Next() {
-		var r Response
-		err = rows.Scan(&r.LocalID, &r.To, &r.Subject, &r.Body, &r.SendTime, &r.SenderCall, &r.SenderBBS)
-		if err != nil {
-			panic(err)
+	db.SQL(st.conn, "SELECT id, sendto, subject, body, sendtime, sendercall, senderbbs FROM response WHERE responseto=? ORDER BY id", func(st *db.St) {
+		st.BindText(to)
+		for st.Step() {
+			var r Response
+
+			r.LocalID = st.ColumnText()
+			r.ResponseTo = to
+			r.To = st.ColumnText()
+			r.Subject = st.ColumnText()
+			r.Body = st.ColumnText()
+			r.SendTime = st.ColumnTime(sendTimeFormat)
+			r.SenderCall = st.ColumnText()
+			r.SenderBBS = st.ColumnText()
+			responses = append(responses, &r)
 		}
-		r.ResponseTo = to
-		responses = append(responses, &r)
-	}
-	if err = rows.Err(); err != nil {
-		panic(err)
-	}
+	})
 	return responses
 }
 
 // SaveResponse saves an outgoing response to the database.
 func (st *Store) SaveResponse(r *Response) {
-	var err error
-
-	st.mutex.Lock()
-	defer st.mutex.Unlock()
-	_, err = st.dbh.Exec("INSERT INTO response (id, responseto, sendto, subject, body, sendtime, sendercall, senderbbs) VALUES (?,?,?,?,?,?,?,?)",
-		r.LocalID, r.ResponseTo, r.To, r.Subject, r.Body, r.SendTime, r.SenderCall, r.SenderBBS)
-	if err != nil {
-		panic(err)
-	}
+	db.Transaction(st.conn, true, func() error {
+		db.SQL(st.conn, "INSERT INTO response (id, responseto, sendto, subject, body, sendtime, sendercall, senderbbs) VALUES (?,?,?,?,?,?,?,?)", func(st *db.St) {
+			st.BindText(r.LocalID)
+			st.BindText(r.ResponseTo)
+			st.BindText(r.To)
+			st.BindText(r.Subject)
+			st.BindText(r.Body)
+			st.BindTime(r.SendTime, sendTimeFormat)
+			st.BindText(r.SenderCall)
+			st.BindText(r.SenderBBS)
+			st.Step()
+		})
+		return nil
+	})
 }

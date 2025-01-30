@@ -1,31 +1,31 @@
 package store
 
 import (
-	"database/sql"
 	"fmt"
+
+	"github.com/rothskeller/wppsvr/db"
 )
 
 // NextMessageID returns the next message ID in the sequence with the specified
 // prefix.
 func (st *Store) NextMessageID(prefix string) string {
-	var (
-		num int
-		err error
-	)
-	st.mutex.Lock()
-	defer st.mutex.Unlock()
-	err = st.dbh.QueryRow("SELECT num FROM msgnum WHERE prefix=?", prefix).Scan(&num)
-	switch err {
-	case nil:
-		num++
-	case sql.ErrNoRows:
-		num = 1
-	default:
-		panic(err)
-	}
-	_, err = st.dbh.Exec("INSERT OR REPLACE INTO msgnum (prefix, num) VALUES (?,?)", prefix, num)
-	if err != nil {
-		panic(err)
-	}
+	var num int
+
+	db.Transaction(st.conn, true, func() error {
+		db.SQL(st.conn, "SELECT num FROM msgnum WHERE prefix=?", func(st *db.St) {
+			st.BindText(prefix)
+			if st.Step() {
+				num = st.ColumnInt() + 1
+			} else {
+				num = 1
+			}
+		})
+		db.SQL(st.conn, "INSERT OR REPLACE INTO msgnum (prefix, num) VALUES (?,?)", func(st *db.St) {
+			st.BindText(prefix)
+			st.BindInt(num)
+			st.Step()
+		})
+		return nil
+	})
 	return fmt.Sprintf("%s-%03dP", prefix, num)
 }

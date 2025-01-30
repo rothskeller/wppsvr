@@ -9,7 +9,6 @@ is an internal implementation detail.
 */
 
 import (
-	"database/sql"
 	"fmt"
 	"io"
 	"os"
@@ -20,6 +19,7 @@ import (
 
 	"github.com/rothskeller/packet/envelope"
 	"github.com/rothskeller/packet/message"
+	"github.com/rothskeller/wppsvr/db"
 	"github.com/rothskeller/wppsvr/interval"
 )
 
@@ -67,6 +67,11 @@ const (
 	ReportToSenders
 )
 
+const (
+	startEndFormat = "2006-01-02 15:04:05-07:00"
+	lastRunFormat  = "2006-01-02 15:04:05.999999999-07:00"
+)
+
 // GetRunningSessions returns the (unordered) list of all running sessions.
 func (s *Store) GetRunningSessions() (list []*Session) {
 	// Running sessions are always realized in the database, because the act
@@ -77,20 +82,13 @@ func (s *Store) GetRunningSessions() (list []*Session) {
 
 // ExistSessions returns whether any sessions exist in the specified time range
 // (inclusive start, exclusive end).
-func (s *Store) ExistSessions(start, end time.Time) bool {
-	var (
-		dummy int
-	)
-	s.mutex.RLock()
-	defer s.mutex.RUnlock()
-	switch err := s.dbh.QueryRow(`SELECT 1 FROM session WHERE end>=? AND end <? LIMIT 1`, start, end).Scan(&dummy); err {
-	case nil:
-		return true
-	case sql.ErrNoRows:
-		return false
-	default:
-		panic(err)
-	}
+func (s *Store) ExistSessions(start, end time.Time) (found bool) {
+	db.SQL(s.conn, "SELECT 1 FROM session WHERE end>=? AND end <? LIMIT 1", func(st *db.St) {
+		st.BindTime(start, startEndFormat)
+		st.BindTime(end, startEndFormat)
+		found = st.Step()
+	})
+	return found
 }
 
 // GetSession returns the session with the specified ID, or nil if there is
@@ -112,151 +110,149 @@ func (s *Store) GetSessions(start, end time.Time) (list []*Session) {
 // getSessionsWhere returns the (unordered) list of sessions matching the
 // specified criteria.
 func (s *Store) getSessionsWhere(where string, args ...interface{}) (list []*Session) {
-	var (
-		rows *sql.Rows
-		err  error
-	)
-	s.mutex.RLock()
-	defer s.mutex.RUnlock()
-	rows, err = s.dbh.Query("SELECT id, callsign, name, prefix, start, end, reporttotext, reporttohtml, tobbses, downbbses, messagetypes, modelmessage, instructions, retrieveat, report, flags FROM session WHERE "+where, args...)
-	if err != nil {
-		panic(err)
-	}
-	for rows.Next() {
-		var (
-			session      Session
-			reporttotext string
-			reporttohtml string
-			tobbses      string
-			downbbses    string
-			messagetypes string
-			rows2        *sql.Rows
-		)
-		err = rows.Scan(&session.ID, &session.CallSign, &session.Name, &session.Prefix, &session.Start, &session.End, &reporttotext, &reporttohtml, &tobbses, &downbbses, &messagetypes, &session.ModelMessage, &session.Instructions, &session.RetrieveAt, &session.Report, &session.Flags)
-		if err != nil {
-			panic(err)
-		}
-		session.ReportToText = split(reporttotext)
-		session.ReportToHTML = split(reporttohtml)
-		session.ToBBSes = split(tobbses)
-		session.DownBBSes = split(downbbses)
-		session.MessageTypes = split(messagetypes)
-		session.RetrieveInterval = interval.Parse(session.RetrieveAt)
-		if session.ModelMessage != "" {
-			if env, body, err := envelope.ParseSaved(session.ModelMessage); err == nil {
-				session.ModelMsg = message.Decode(env, body)
-			} else {
-				panic(err)
+	db.Transaction(s.conn, false, func() error {
+		db.SQL(s.conn, "SELECT id, callsign, name, prefix, start, end, reporttotext, reporttohtml, tobbses, downbbses, messagetypes, modelmessage, instructions, retrieveat, report, flags FROM session WHERE "+where, func(st *db.St) {
+			for _, arg := range args {
+				switch arg := arg.(type) {
+				case int:
+					st.BindInt(arg)
+				case time.Time:
+					st.BindTime(arg, startEndFormat)
+				}
 			}
-		}
-		rows2, err = s.dbh.Query(`SELECT bbs, lastrun FROM retrieval WHERE session=?`, session.ID)
-		if err != nil {
-			panic(err)
-		}
-		for rows2.Next() {
-			var r Retrieval
+			for st.Step() {
+				var session Session
 
-			if err = rows2.Scan(&r.BBS, &r.LastRun); err != nil {
-				panic(err)
+				session.ID = st.ColumnInt()
+				session.CallSign = st.ColumnText()
+				session.Name = st.ColumnText()
+				session.Prefix = st.ColumnText()
+				session.Start = st.ColumnTime(startEndFormat)
+				session.End = st.ColumnTime(startEndFormat)
+				session.ReportToText = split(st.ColumnText())
+				session.ReportToHTML = split(st.ColumnText())
+				session.ToBBSes = split(st.ColumnText())
+				session.DownBBSes = split(st.ColumnText())
+				session.MessageTypes = split(st.ColumnText())
+				session.ModelMessage = st.ColumnText()
+				session.Instructions = st.ColumnText()
+				session.RetrieveAt = st.ColumnText()
+				session.Report = st.ColumnText()
+				session.Flags = SessionFlags(st.ColumnInt())
+				session.RetrieveInterval = interval.Parse(session.RetrieveAt)
+				if session.ModelMessage != "" {
+					if env, body, err := envelope.ParseSaved(session.ModelMessage); err == nil {
+						session.ModelMsg = message.Decode(env, body)
+					} else {
+						panic(err)
+					}
+				}
+				db.SQL(s.conn, "SELECT bbs, lastrun FROM retrieval WHERE session=?", func(s2 *db.St) {
+					s2.BindInt(session.ID)
+					for s2.Step() {
+						var r Retrieval
+
+						r.BBS = s2.ColumnText()
+						r.LastRun = s2.ColumnTime(lastRunFormat)
+						session.Retrieve = append(session.Retrieve, &r)
+					}
+				})
+				list = append(list, &session)
 			}
-			session.Retrieve = append(session.Retrieve, &r)
-		}
-		if err = rows2.Err(); err != nil {
-			panic(err)
-		}
-		list = append(list, &session)
-	}
-	if err = rows.Err(); err != nil {
-		panic(err)
-	}
+		})
+		return nil
+	})
 	return list
 }
 
 // CreateSession creates a new session.
 func (s *Store) CreateSession(session *Session) {
-	var (
-		tx     *sql.Tx
-		result sql.Result
-		id     int64
-		err    error
-	)
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-	tx, err = s.dbh.Begin()
-	if err != nil {
-		panic(err)
-	}
-	result, err = tx.Exec("INSERT INTO session (callsign, name, prefix, start, end, reporttotext, reporttohtml, tobbses, downbbses, messagetypes, modelmessage, instructions, retrieveat, report, flags) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-		session.CallSign, session.Name, session.Prefix, session.Start, session.End,
-		strings.Join(session.ReportToText, ";"), strings.Join(session.ReportToHTML, ";"), strings.Join(session.ToBBSes, ";"),
-		strings.Join(session.DownBBSes, ";"), strings.Join(session.MessageTypes, ";"), session.ModelMessage,
-		session.Instructions, session.RetrieveAt, session.Report, session.Flags)
-	if err != nil {
-		panic(err)
-	}
-	id, err = result.LastInsertId()
-	if err != nil {
-		panic(err)
-	}
-	session.ID = int(id)
-	for _, r := range session.Retrieve {
-		_, err = tx.Exec("INSERT INTO retrieval (session, bbs, lastrun) VALUES (?,?,?)",
-			session.ID, r.BBS, r.LastRun)
-		if err != nil {
-			panic(err)
-		}
-	}
-	if err = tx.Commit(); err != nil {
-		panic(err)
-	}
+	db.Transaction(s.conn, true, func() error {
+		db.SQL(s.conn, "INSERT INTO session (callsign, name, prefix, start, end, reporttotext, reporttohtml, tobbses, downbbses, messagetypes, modelmessage, instructions, retrieveat, report, flags) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", func(st *db.St) {
+			st.BindText(session.CallSign)
+			st.BindText(session.Name)
+			st.BindText(session.Prefix)
+			st.BindTime(session.Start, startEndFormat)
+			st.BindTime(session.End, startEndFormat)
+			st.BindText(strings.Join(session.ReportToText, ";"))
+			st.BindText(strings.Join(session.ReportToHTML, ";"))
+			st.BindText(strings.Join(session.ToBBSes, ";"))
+			st.BindText(strings.Join(session.DownBBSes, ";"))
+			st.BindText(strings.Join(session.MessageTypes, ";"))
+			st.BindText(session.ModelMessage)
+			st.BindText(session.Instructions)
+			st.BindText(session.RetrieveAt)
+			st.BindText(session.Report)
+			st.BindInt(int(session.Flags))
+			st.Step()
+		})
+		session.ID = int(s.conn.LastInsertRowID())
+		db.SQL(s.conn, "INSERT INTO retrieval (session, bbs, lastrun) VALUES (?,?,?)", func(st *db.St) {
+			for _, r := range session.Retrieve {
+				st.BindInt(session.ID)
+				st.BindText(r.BBS)
+				st.BindTime(r.LastRun, lastRunFormat)
+				st.Step()
+				st.Reset()
+			}
+		})
+		return nil
+	})
 }
 
 // UpdateSession updates an existing session.
 func (s *Store) UpdateSession(session *Session) {
-	var (
-		tx  *sql.Tx
-		err error
-	)
 	if session.ID == 0 {
 		// This is an unrealized session; we actually need to create it.
 		s.CreateSession(session)
 		return
 	}
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-	if tx, err = s.dbh.Begin(); err != nil {
-		panic(err)
-	}
-	_, err = tx.Exec("UPDATE session SET (callsign, name, prefix, start, end, reporttotext, reporttohtml, tobbses, downbbses, messagetypes, modelmessage, instructions, retrieveat, report, flags) = (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) WHERE id=?",
-		session.CallSign, session.Name, session.Prefix, session.Start, session.End,
-		strings.Join(session.ReportToText, ";"), strings.Join(session.ReportToHTML, ";"), strings.Join(session.ToBBSes, ";"),
-		strings.Join(session.DownBBSes, ";"), strings.Join(session.MessageTypes, ";"), session.ModelMessage,
-		session.Instructions, session.RetrieveAt, session.Report, session.Flags, session.ID)
-	if err != nil {
-		panic(err)
-	}
-	if _, err = tx.Exec(`DELETE FROM retrieval WHERE session=?`, session.ID); err != nil {
-		panic(err)
-	}
-	for _, r := range session.Retrieve {
-		_, err = tx.Exec("INSERT INTO retrieval (session, bbs, lastrun) VALUES (?,?,?)",
-			session.ID, r.BBS, r.LastRun)
-		if err != nil {
-			panic(err)
-		}
-	}
-	if err = tx.Commit(); err != nil {
-		panic(err)
-	}
+	db.Transaction(s.conn, true, func() error {
+		db.SQL(s.conn, "UPDATE session SET (callsign, name, prefix, start, end, reporttotext, reporttohtml, tobbses, downbbses, messagetypes, modelmessage, instructions, retrieveat, report, flags) = (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) WHERE id=?", func(st *db.St) {
+			st.BindText(session.CallSign)
+			st.BindText(session.Name)
+			st.BindText(session.Prefix)
+			st.BindTime(session.Start, startEndFormat)
+			st.BindTime(session.End, startEndFormat)
+			st.BindText(strings.Join(session.ReportToText, ";"))
+			st.BindText(strings.Join(session.ReportToHTML, ";"))
+			st.BindText(strings.Join(session.ToBBSes, ";"))
+			st.BindText(strings.Join(session.DownBBSes, ";"))
+			st.BindText(strings.Join(session.MessageTypes, ";"))
+			st.BindText(session.ModelMessage)
+			st.BindText(session.Instructions)
+			st.BindText(session.RetrieveAt)
+			st.BindText(session.Report)
+			st.BindInt(int(session.Flags))
+			st.BindInt(session.ID)
+			st.Step()
+		})
+		db.SQL(s.conn, "DELETE FROM retrieval WHERE session=?", func(st *db.St) {
+			st.BindInt(session.ID)
+			st.Step()
+		})
+		db.SQL(s.conn, "INSERT INTO retrieval (session, bbs, lastrun) VALUES (?,?,?)", func(st *db.St) {
+			for _, r := range session.Retrieve {
+				st.BindInt(session.ID)
+				st.BindText(r.BBS)
+				st.BindTime(r.LastRun, lastRunFormat)
+				st.Step()
+				st.Reset()
+			}
+		})
+		return nil
+	})
 }
 
 // DeleteSession deletes a session.
 func (s *Store) DeleteSession(session *Session) {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-	if _, err := s.dbh.Exec(`DELETE FROM session WHERE id=?`, session.ID); err != nil {
-		panic(err)
-	}
+	db.Transaction(s.conn, true, func() error {
+		db.SQL(s.conn, "DELETE FROM session WHERE id=?", func(st *db.St) {
+			st.BindInt(session.ID)
+			st.Step()
+		})
+		return nil
+	})
 }
 
 // ModelImageCount returns the number of model images associated with the

@@ -1,5 +1,12 @@
 -- Database schema for the packet-checkins application.
 
+-- The login table stores login information for currently logged in users.
+CREATE TABLE login (
+  token    text     PRIMARY KEY,
+  expires  datetime NOT NULL,
+  callsign text     NOT NULL
+);
+
 -- The message table stores all received messages.
 CREATE TABLE message (
     id           text     PRIMARY KEY,

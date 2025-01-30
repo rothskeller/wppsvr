@@ -22,7 +22,7 @@ func (ws *webserver) serveCalendar(w http.ResponseWriter, r *http.Request) {
 		callsign string
 		year     = time.Now().Year()
 	)
-	if callsign = checkLoggedIn(w, r); callsign == "" {
+	if callsign = ws.checkLoggedIn(w, r); callsign == "" {
 		return
 	}
 	// What are we trying to view?  The check-in counts, or the results for
@@ -175,8 +175,8 @@ func (ws *webserver) calendarCell(session *store.Session, callsign string) (clas
 	if session.ID == 0 {
 		return "noci", "—"
 	}
-	var fromAddrs = make(map[string]int)
-	var minscore = 0
+	fromAddrs := make(map[string]int)
+	minscore := 0
 	for _, message := range ws.st.GetSessionMessages(session.ID) {
 		if message.FromCallSign != callsign {
 			continue

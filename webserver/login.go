@@ -7,25 +7,13 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/rothskeller/wppsvr/config"
 )
 
-type login struct {
-	token    string
-	callsign string
-	expires  time.Time
-}
-
-var (
-	logins     []login
-	loginMutex sync.Mutex
-)
-
 // serveLogin responds to POST /login requests.
-func (*webserver) serveLogin(w http.ResponseWriter, r *http.Request) {
+func (ws *webserver) serveLogin(w http.ResponseWriter, r *http.Request) {
 	callsign := r.FormValue("callsign")
 	password := r.FormValue("password")
 	if callsign == "" || password == "" || !validLogin(callsign, password) {
@@ -34,10 +22,8 @@ func (*webserver) serveLogin(w http.ResponseWriter, r *http.Request) {
 	}
 	token := randomToken()
 	callsign = strings.ToUpper(callsign)
-	loginMutex.Lock()
-	logins = append(logins, login{token: token, callsign: callsign, expires: time.Now().Add(time.Hour)})
-	loginMutex.Unlock()
-	http.SetCookie(w, &http.Cookie{Name: "auth", Value: token, Path: "/", Secure: true})
+	ws.st.AddLogin(token, callsign, time.Now().Add(time.Hour))
+	http.SetCookie(w, &http.Cookie{Name: "auth", Value: token, Path: "/" /*, Secure: true  TODO */})
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -71,38 +57,14 @@ func validLogin(callsign, password string) bool {
 // checkLoggedIn verifies that the user is logged in, and returns their call
 // sign.  If the user is not properly logged in, it emits a redirect to the
 // login page and returns an empty string.
-func checkLoggedIn(w http.ResponseWriter, r *http.Request) string {
-	var token string
+func (ws *webserver) checkLoggedIn(w http.ResponseWriter, r *http.Request) (callsign string) {
 	if c, err := r.Cookie("auth"); err == nil {
-		token = c.Value
-		loginMutex.Lock()
-		defer loginMutex.Unlock()
-		removeExpiredLogins()
-		for i, login := range logins {
-			if login.token == token {
-				logins[i].expires = time.Now().Add(time.Hour)
-				return login.callsign
-			}
-		}
+		callsign = ws.st.GetLogin(c.Value)
 	}
-	http.Redirect(w, r, "/", http.StatusSeeOther)
-	return ""
-}
-
-// removeExpiredLogins removes all expired logins from the list.  It must be
-// called with loginMutex held.
-func removeExpiredLogins() {
-	now := time.Now()
-	for i := 0; i < len(logins); {
-		if !logins[i].expires.Before(now) {
-			i++
-		} else {
-			if i < len(logins)-1 {
-				logins[i] = logins[len(logins)-1]
-			}
-			logins = logins[:len(logins)-1]
-		}
+	if callsign == "" {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
+	return callsign
 }
 
 // randomToken returns a random token string.

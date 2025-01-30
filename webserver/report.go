@@ -14,7 +14,7 @@ func (ws *webserver) serveReport(w http.ResponseWriter, r *http.Request) {
 		callsign string
 		session  *store.Session
 	)
-	if callsign = checkLoggedIn(w, r); callsign == "" {
+	if callsign = ws.checkLoggedIn(w, r); callsign == "" {
 		return
 	}
 	if sid, err := strconv.Atoi(r.FormValue("session")); err == nil {

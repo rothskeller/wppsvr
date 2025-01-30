@@ -2,5 +2,8 @@
 /config.yaml
 log
 run.lock
+wppcgi
+wppcron
 wppsvr.db
+wppsvr.db-journal
 wppsvr
