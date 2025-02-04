@@ -35,6 +35,8 @@ github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec h1:W09IVJc94
 github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec/go.mod h1:qqbHyh8v60DhA7CoWK5oRCqLrMHRGoxYCSS9EjAz6Eo=
 github.com/rothskeller/packet v1.10.0 h1:xxT9YdBeLF8PL987zlz0C1a1iRI9lxVmZhAQkYGMMJY=
 github.com/rothskeller/packet v1.10.0/go.mod h1:cDPt3pbczi7NvR3n1U7NQHxX6Y8a8KXHspyiMPsh0dA=
+github.com/rothskeller/packet v1.10.2 h1:Px545Qi0gSbgRKtRUJPvbshkCW3/QIwKLbzbdHuNUno=
+github.com/rothskeller/packet v1.10.2/go.mod h1:cDPt3pbczi7NvR3n1U7NQHxX6Y8a8KXHspyiMPsh0dA=
 github.com/rothskeller/pdf v1.3.0 h1:PmNt33YWSYpxhY3SqKUKZYqgJ5wFjkqMCTO7Y26X2NA=
 github.com/rothskeller/pdf v1.3.0/go.mod h1:IaHv090aWF/QQYo/THVjpQWiOvN2Sk90jyzT8nq/YdI=
 github.com/ruudk/golang-pdf417 v0.0.0-20181029194003-1af4ab5afa58/go.mod h1:6lfFZQK844Gfx8o5WFuvpxWRwnSoipWe/p622j1v06w=
