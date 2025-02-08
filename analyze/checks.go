@@ -78,7 +78,7 @@ func (a *Analysis) messageCounts(parseErr error) bool {
 			english.Conjoin(a.session.ToBBSes, "or"))
 	}
 	// Check that it was sent after the start of the session.
-	var rcvdate = a.env.BBSReceivedDate
+	rcvdate := a.env.BBSReceivedDate
 	if rcvdate.IsZero() {
 		rcvdate = a.env.Date
 	}
@@ -185,8 +185,8 @@ func (a *Analysis) checkCorrectness() {
 		}
 		// Make sure the PIFO and form versions are up to date.
 		a.outOf += 2
-		var minPIFO = config.Get().MinPIFOVersion
-		var minForm = config.Get().MessageTypes[a.mb.Type.Tag].MinimumVersion
+		minPIFO := config.Get().MinPIFOVersion
+		minForm := config.Get().MessageTypes[a.mb.Type.Tag].MinimumVersion
 		if message.OlderVersion(a.mb.PIFOVersion, minPIFO) {
 			a.setSummary("PackItForms version out of date")
 			fmt.Fprintf(a.analysis, "<h2>PackItForms Version Out of Date</h2><p>This message used version %s of PackItForms to encode the form, but that version is not current.  Please use PackItForms version %s or newer to encode messages containing forms.</p>",
@@ -262,6 +262,7 @@ func (a *Analysis) checkCorrectness() {
 		}
 	}
 }
+
 func nonASCII(r rune) bool {
 	return r > 126 || (r < 32 && r != '\t' && r != '\n')
 }
@@ -369,7 +370,7 @@ func (a *Analysis) checkNonModel() {
 	}
 	// Make sure the message is of a type allowed for the session.
 	a.outOf++
-	var allowed = a.session.MessageTypes
+	allowed := a.session.MessageTypes
 	if config.Get().BBSes[a.sm.FromBBS] == nil {
 		// Plain text messages are always OK when they come from outside
 		// the county BBS system.
@@ -406,7 +407,7 @@ func (a *Analysis) checkNonModel() {
 // for the session.  Any problems are added to the analysis.
 func (a *Analysis) compareAgainstModel() {
 	// Make sure the received message is the same type as the model.
-	if a.mb.Type != a.session.ModelMsg.Base().Type {
+	if a.mb.Type.Tag != a.session.ModelMsg.Base().Type.Tag {
 		a.outOf *= 2 // Give a 50% score.
 		a.setSummary("incorrect message type")
 		fmt.Fprintf(a.analysis, "<h2>Incorrect Message Type</h2><p>This message is %s %s.  For the %s on %s, operators are expected to send a copy of the provided %s.</p>",
@@ -415,7 +416,7 @@ func (a *Analysis) compareAgainstModel() {
 		return
 	}
 	// Compare the message against the model.
-	var score, outOf, fields = a.session.ModelMsg.Compare(a.msg)
+	score, outOf, fields := a.session.ModelMsg.Compare(a.msg)
 	// The model may have left destination or handling blank, as an exercise
 	// for the operator to look them up in the recommended routing cheat
 	// sheet.  If so, we need to fix up the results of the comparison for
@@ -521,7 +522,7 @@ func formatFieldValue(value, mask string) string {
 		style string
 	)
 	for i, c := range value {
-		var nstyle = style
+		nstyle := style
 		if i < len(mask) {
 			var ok bool
 			if nstyle, ok = styles[mask[i]]; !ok {
