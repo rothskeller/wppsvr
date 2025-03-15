@@ -12,7 +12,7 @@ import (
 var contentMarker = "@@CONTENT@@"
 
 //go:embed "html.html"
-var reportHTML string
+var reportProlog string
 
 // RenderHTML renders a report in HTML format.  If links is set to a call sign,
 // only messages from that call sign have embedded links.  If links is an empty
@@ -20,15 +20,25 @@ var reportHTML string
 func (r *Report) RenderHTML(links string) string {
 	var sb strings.Builder
 
-	content := strings.Index(reportHTML, contentMarker)
-	sb.WriteString(reportHTML[:content])
-	r.htmlTitle(&sb)
-	r.htmlExpectsResults(&sb)
-	r.htmlStatistics(&sb)
-	r.htmlMessages(&sb, links)
-	r.htmlGenInfo(&sb)
-	sb.WriteString(reportHTML[content+len(contentMarker):])
+	RenderHTMLProlog(&sb)
+	r.RenderHTMLBody(&sb, links)
 	return sb.String()
+}
+
+// RenderHTMLProlog renders the prolog of an HTML report.
+func RenderHTMLProlog(sb *strings.Builder) {
+	sb.WriteString(reportProlog)
+}
+
+// RenderHTMLBody renders the body of an HTML report.
+func (r *Report) RenderHTMLBody(sb *strings.Builder, links string) {
+	sb.WriteString(`<div id=report><div id=org>Santa Clara County ARES<sup>®</sup>/RACES</div><div id=title><a href=/>Weekly Packet Practice</a></div>`)
+	r.htmlTitle(sb)
+	r.htmlExpectsResults(sb)
+	r.htmlStatistics(sb)
+	r.htmlMessages(sb, links)
+	r.htmlGenInfo(sb)
+	sb.WriteString("</div>")
 }
 
 func (r *Report) htmlTitle(sb *strings.Builder) {
@@ -117,8 +127,8 @@ func (r *Report) htmlStatistics(sb *strings.Builder) {
 		sb.WriteString(`</div>`)
 	}
 	if len(r.Jurisdictions) != 0 {
-		var cols = (len(r.Jurisdictions) + 5) / 6
-		var rows = (len(r.Jurisdictions) + cols - 1) / cols
+		cols := (len(r.Jurisdictions) + 5) / 6
+		rows := (len(r.Jurisdictions) + cols - 1) / cols
 		sb.WriteString(`<div class="block"><div class="block-title">Jurisdictions</div><div class="key-value-columns">`)
 		for col := 0; col < len(r.Jurisdictions); col += rows {
 			sb.WriteString(`<div class="key-value">`)

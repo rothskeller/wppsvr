@@ -91,6 +91,20 @@ func (s *Store) ExistSessions(start, end time.Time) (found bool) {
 	return found
 }
 
+// OverlappingSession returns whether any sessions exist with an overlapping
+// time range and the same call sign.  If allow is non-zero, a session with that
+// ID doesn't count (generally the one we're trying to test overlap against).
+func (s *Store) OverlappingSession(start, end time.Time, callsign string, allow int) (found bool) {
+	db.SQL(s.conn, "SELECT 1 FROM session WHERE callsign=? AND start<=? AND ?<=end AND id!=?", func(st *db.St) {
+		st.BindText(callsign)
+		st.BindTime(end, startEndFormat)
+		st.BindTime(start, startEndFormat)
+		st.BindInt(allow)
+		found = st.Step()
+	})
+	return found
+}
+
 // GetSession returns the session with the specified ID, or nil if there is
 // none.
 func (s *Store) GetSession(id int) *Session {

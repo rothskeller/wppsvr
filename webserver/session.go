@@ -70,10 +70,10 @@ func (ws *webserver) serveSessionEdit(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, fmt.Sprintf("/sessions?year=%d", session.End.Year()), http.StatusSeeOther)
 			return
 		}
-		startDate, startTime, startError = readStart(r, session)
-		endDate, endTime, endError = ws.readEnd(r, session)
 		nameError = readName(r, session)
 		callSignError = readCallSign(r, session)
+		startDate, startTime, startError = readStart(r, session)
+		endDate, endTime, endError = ws.readEnd(r, session)
 		prefixError = readPrefix(r, session)
 		readExcludeFromWeek(r, session)
 		reportToTextError = readReportToText(r, session)
@@ -227,14 +227,12 @@ func (ws *webserver) readEnd(r *http.Request, session *store.Session) (datestr, 
 		return datestr, timestr, "The end time is not a valid HH:MM time."
 	}
 	session.End, _ = time.ParseInLocation("2006-01-02 15:04", datestr+" "+timestr, time.Local)
-	for _, existing := range ws.st.GetSessions(
-		time.Date(session.End.Year(), session.End.Month(), session.End.Day(), 0, 0, 0, 0, time.Local),
-		time.Date(session.End.Year(), session.End.Month(), session.End.Day()+1, 0, 0, 0, 0, time.Local),
-	) {
-		if existing.ID == session.ID && r.FormValue("copy") == "" {
-			continue
-		}
-		return datestr, timestr, "Another session already ends on this date."
+	var allow int
+	if r.FormValue("copy") == "" {
+		allow = session.ID
+	}
+	if ws.st.OverlappingSession(session.Start, session.End, session.CallSign, allow) {
+		return datestr, timestr, "This session overlaps with another at the same time."
 	}
 	return datestr, timestr, ""
 }

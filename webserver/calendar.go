@@ -127,28 +127,34 @@ func (ws *webserver) serveCalendarMonth(calendar *htmlb.Element, year int, month
 	}
 	for ; date.Month() == month; date = date.AddDate(0, 0, 1) {
 		var (
-			session *store.Session
+			daysess []*store.Session
 			ciClass string
 			ciValue string
 		)
-		if len(sessions) != 0 && sameDay(sessions[0].End, date) {
-			session = sessions[0]
-			for len(sessions) != 0 && sameDay(sessions[0].End, date) {
-				sessions = sessions[1:]
-			}
+		for len(sessions) != 0 && sameDay(sessions[0].End, date) {
+			daysess, sessions = append(daysess, sessions[0]), sessions[1:]
 		}
-		if session == nil {
+		if len(daysess) == 0 {
 			mdiv.E("div class=day").E("div class=date>%d", date.Day())
 			continue
 		}
 		if view == "counts" {
+			var count int
+
 			ciClass = "count"
-			ciValue = strconv.Itoa(ws.sessionCheckInCount(session))
+			for _, s := range daysess {
+				count += ws.sessionCheckInCount(s)
+			}
+			ciValue = strconv.Itoa(count)
 		} else {
-			ciClass, ciValue = ws.calendarCell(session, view)
+			for _, s := range daysess {
+				if ciClass, ciValue = ws.calendarCell(s, view); ciClass != "noci" {
+					break
+				}
+			}
 		}
 		ddiv := mdiv.E("div class='day net'")
-		ddiv.E("div class=date").E("a href=report?session=%d>%d", session.ID, date.Day())
+		ddiv.E("div class=date").E("a href=report?date=%s>%d", date.Format("2006-01-02"), date.Day())
 		ddiv.E("div class=%s>%s", ciClass, ciValue)
 	}
 	for i := int(date.Weekday()); i%7 != 0; i++ {
