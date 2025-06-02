@@ -79,7 +79,7 @@ func (ws *webserver) serveInstructions(w http.ResponseWriter, r *http.Request) {
 		}
 		para.R(" plain text message with the text shown below")
 	default:
-		var mb = msg.Base()
+		mb := msg.Base()
 		para.TF("the %s shown below", mb.Type.Name)
 		needHandling = mb.FHandling != nil && *mb.FHandling == ""
 		needDestination = (mb.FToICSPosition != nil && *mb.FToICSPosition == "") ||
@@ -107,19 +107,19 @@ func (ws *webserver) serveInstructions(w http.ResponseWriter, r *http.Request) {
 	}
 	main.E("p style=margin-bottom:0>The following references may be helpful to you:")
 	list := main.E("ul style=margin-top:0")
-	list.E("li>The ").E("a href=https://www.scc-ares-races.org/freqs/packet-freqs.html target=_blank>Packet Frequency and BBS Listings").
-		P().TF(" will tell you which BBS to use to reach %s.", session.CallSign)
+	list.E("li>The ").E("a href=https://www.scc-ares-races.org/operations/packet/bbs-assign target=_blank>City/Agency BBS Assignments").
+		P().TF(" page will tell you which BBS to use to reach %s.", session.CallSign)
 	list.E("li>The “Standard Outpost Configuration Instructions”, available on the ").
-		E("a href=https://www.scc-ares-races.org/data/packet/index.html target=_blank>Packet BBS Service").
+		E("a href=https://www.scc-ares-races.org/services/data/bbs target=_blank>Packet BBS Service").
 		P().R(" page, will tell you how to configure Outpost to send messages following county standards.")
 	if plainText {
 		list.E("li>The “Standard Packet Message Subject Line”, available on the ").
-			E("a href=https://www.scc-ares-races.org/data/packet/index.html target=_blank>Packet BBS Service").
+			E("a href=https://www.scc-ares-races.org/services/data/bbs target=_blank>Packet BBS Service").
 			P().R(" page, will tell you how to construct the subject line of your message to conform to county standards.")
 	}
 	if needHandling || needDestination {
 		li := list.E("li>The “RACES Recommended Form Routing Cheat Sheet”, available on the ")
-		li.E("a href=https://www.scc-ares-races.org/operations/go-kit-forms.html target=_blank>Go Kit Forms")
+		li.E("a href=https://www.scc-ares-races.org/operations/forms/go-kit target=_blank>Go Kit Forms")
 		li.R(" page, will tell you how to fill in the ")
 		if needHandling && needDestination {
 			li.R("handling and destination fields")
@@ -131,7 +131,7 @@ func (ws *webserver) serveInstructions(w http.ResponseWriter, r *http.Request) {
 		li.R(" for this message.")
 	}
 	list.E("li>The <kbd>packet@scc-ares-races.groups.io</kbd> mailing list is the best place to ask for help or report problems.  To join that list, see the instructions on the ").
-		E("a href=https://www.scc-ares-races.org/discuss-groups.html target=_blank>Discussion Groups").
+		E("a href=https://www.scc-ares-races.org/about/email-lists target=_blank>Email Discussion Groups").
 		P().R(" page.")
 	count := ws.st.ModelImageCount(session.ID)
 	for pnum := 1; pnum <= count; pnum++ {

@@ -31,13 +31,13 @@ func (a *Analysis) Responses(st astore) (list []*store.Response) {
 		dr.LocalMessageID = a.sm.LocalID
 		switch a.sm.Score {
 		case 0:
-			dr.ExtraText = fmt.Sprintf("MESSAGE WAS NOT COUNTED as a check-in to the %s on %s.\nReason: %s\nFor more information, visit https://scc-ares-races.org/pacpractice",
+			dr.ExtraText = fmt.Sprintf("MESSAGE WAS NOT COUNTED as a check-in to the %s on %s.\nReason: %s\nFor more information, visit https://wpp.scc-ares-races.org",
 				a.session.Name, a.session.End.Format("January 2"), a.sm.Summary)
 		case 100:
 			dr.ExtraText = fmt.Sprintf("100%% correct check-in to the %s on %s.",
 				a.session.Name, a.session.End.Format("January 2"))
 		default:
-			dr.ExtraText = fmt.Sprintf("%d%% score for check-in to the %s on %s.\nReason: %s\nFor more information, visit https://scc-ares-races.org/pacpractice",
+			dr.ExtraText = fmt.Sprintf("%d%% score for check-in to the %s on %s.\nReason: %s\nFor more information, visit https://wpp.scc-ares-races.org",
 				a.sm.Score, a.session.Name, a.session.End.Format("January 2"), a.sm.Summary)
 		}
 		var r store.Response

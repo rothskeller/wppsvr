@@ -62,7 +62,7 @@ func (a *Analysis) messageCounts(parseErr error) bool {
 	if _, ok := a.msg.(*readrcpt.ReadReceipt); ok {
 		a.score, a.outOf = 0, 1
 		a.setSummary("unexpected READ receipt message")
-		a.analysis.WriteString(`<h2>Unexpected READ Receipt Message</h2><p>This message is an Outpost “read receipt,” which should not have been sent.  Most likely, your Outpost installation has the “Auto-Read Receipt” setting turned on.  The SCCo “Standard Outpost Configuration Instructions” (available on the <a href="https://www.scc-ares-races.org/data/packet/index.html">“Packet BBS Service” page</a> of the county ARES website) specifies that this setting should be turned off.  You can find it on the Receipts tab of the Message Settings dialog in Outpost.</p>`)
+		a.analysis.WriteString(`<h2>Unexpected READ Receipt Message</h2><p>This message is an Outpost “read receipt,” which should not have been sent.  Most likely, your Outpost installation has the “Auto-Read Receipt” setting turned on.  The SCCo “Standard Outpost Configuration Instructions” (available on the <a href="https://www.scc-ares-races.org/services/data/bbs">“Packet BBS Service” page</a> of the county ARES website) specifies that this setting should be turned off.  You can find it on the Receipts tab of the Message Settings dialog in Outpost.</p>`)
 		return false
 	}
 	// Check that it was sent to a correct BBS.
@@ -222,13 +222,13 @@ func (a *Analysis) checkCorrectness() {
 		msgid, severity, handling, formtag, _ := message.DecodeSubject(a.subject)
 		if msgid == "" {
 			a.setSummary("incorrect subject line format")
-			a.analysis.WriteString(`<h2>Incorrect Subject Line Format</h2><p>This message has an incorrect subject line format.  According to the SCCo “Standard Packet Message Subject Line” (available on the <a href="https://www.scc-ares-races.org/data/packet/index.html">“Packet BBS Service” page</a> of the county ARES website), the subject line should look like <tt>AAA-111P_R_Subject</tt>, where <tt>AAA-111P</tt> is the message number, <tt>R</tt> is the handling order code, and <tt>Subject</tt> is the message subject.</p>`)
+			a.analysis.WriteString(`<h2>Incorrect Subject Line Format</h2><p>This message has an incorrect subject line format.  According to the SCCo “Standard Packet Message Subject Line” (available on the <a href="https://www.scc-ares-races.org/services/data/bbs">“Packet BBS Service” page</a> of the county ARES website), the subject line should look like <tt>AAA-111P_R_Subject</tt>, where <tt>AAA-111P</tt> is the message number, <tt>R</tt> is the handling order code, and <tt>Subject</tt> is the message subject.</p>`)
 		} else {
 			a.checkMessageNumber()
 			a.score++
 			if severity != "" {
 				a.setSummary("severity on subject line")
-				fmt.Fprintf(a.analysis, `<h2>Severity on Subject Line</h2><p>The subject line of this message contains both a Severity code and a Handling Order code (“_%s/%s_”).  This is an outdated subject line style.  The current SCCo “Standard Packet Message Subject Line” (available on the <a href="https://www.scc-ares-races.org/data/packet/index.html">“Packet BBS Service” page</a> of the county ARES website) includes only the Handling Order code on the Subject line (“_%[2]s_”).</p>`,
+				fmt.Fprintf(a.analysis, `<h2>Severity on Subject Line</h2><p>The subject line of this message contains both a Severity code and a Handling Order code (“_%s/%s_”).  This is an outdated subject line style.  The current SCCo “Standard Packet Message Subject Line” (available on the <a href="https://www.scc-ares-races.org/services/data/bbs">“Packet BBS Service” page</a> of the county ARES website) includes only the Handling Order code on the Subject line (“_%[2]s_”).</p>`,
 					severity, handling)
 			} else {
 				a.score++
@@ -238,10 +238,10 @@ func (a *Analysis) checkCorrectness() {
 				a.score++
 			case "":
 				a.setSummary("missing handling order code")
-				a.analysis.WriteString(`<h2>Missing Handling Order Code on Subject Line</h2><p>The Subject line of this message does not contain a Handling Order code. As documented in the SCCo “Standard Packet Message Subject Line” (available on the <a href="https://www.scc-ares-races.org/data/packet/index.html">“Packet BBS Service” page</a> of the county ARES website), it must contain an “I” for Immediate, “P” for Priority, or “R” for Routine.</p>`)
+				a.analysis.WriteString(`<h2>Missing Handling Order Code on Subject Line</h2><p>The Subject line of this message does not contain a Handling Order code. As documented in the SCCo “Standard Packet Message Subject Line” (available on the <a href="https://www.scc-ares-races.org/services/data/bbs">“Packet BBS Service” page</a> of the county ARES website), it must contain an “I” for Immediate, “P” for Priority, or “R” for Routine.</p>`)
 			default:
 				a.setSummary("unknown handling order code")
-				fmt.Fprintf(a.analysis, `<h2>Unknown Handling Order Code on Subject Line</h2><p>The Subject line of this message contains an invalid Handling Order code (“%s”). As documented in the SCCo “Standard Packet Message Subject Line” (available on the <a href="https://www.scc-ares-races.org/data/packet/index.html">“Packet BBS Service” page</a> of the county ARES website), the valid codes are “I” for Immediate, “P” for Priority, and “R” for Routine.</p>`,
+				fmt.Fprintf(a.analysis, `<h2>Unknown Handling Order Code on Subject Line</h2><p>The Subject line of this message contains an invalid Handling Order code (“%s”). As documented in the SCCo “Standard Packet Message Subject Line” (available on the <a href="https://www.scc-ares-races.org/services/data/bbs">“Packet BBS Service” page</a> of the county ARES website), the valid codes are “I” for Immediate, “P” for Priority, and “R” for Routine.</p>`,
 					html.EscapeString(handling))
 			}
 		}
@@ -275,13 +275,13 @@ func (a *Analysis) checkMessageNumber() {
 		a.outOf++
 		if !msgnumRE.MatchString(msgid) {
 			a.setSummary("incorrect message number format")
-			a.analysis.WriteString(`<h2>Incorrect Message Number Format</h2><p style="margin-bottom:0">The message number of this message is not formatted correctly.  According to the SCCo “Standard Packet Message Subject Line” document (available on the <a href="https://www.scc-ares-races.org/data/packet/index.html">“Packet BBS Service” page</a> of the county ARES website), it should have a format like "XND-042P", containing:</p><ul style="margin-top:0;margin-bottom:0"><li>a three-character prefix (usually the last three characters of the sender's call sign),</li><li>a dash,</li><li>a number with at least three digits, and</li><li>a “P”, “M”, or “R” suffix.</ul><p style="margin-top:0">All letters should be upper case.  In Outpost, the format of the message number is set in the Message Settings dialog, which should be configured according to the SCCo “Standard Outpost Configuration Instructions” (available on the same page).</p>`)
+			a.analysis.WriteString(`<h2>Incorrect Message Number Format</h2><p style="margin-bottom:0">The message number of this message is not formatted correctly.  According to the SCCo “Standard Packet Message Subject Line” document (available on the <a href="https://www.scc-ares-races.org/services/data/bbs">“Packet BBS Service” page</a> of the county ARES website), it should have a format like "XND-042P", containing:</p><ul style="margin-top:0;margin-bottom:0"><li>a three-character prefix (usually the last three characters of the sender's call sign),</li><li>a dash,</li><li>a number with at least three digits, and</li><li>a “P”, “M”, or “R” suffix.</ul><p style="margin-top:0">All letters should be upper case.  In Outpost, the format of the message number is set in the Message Settings dialog, which should be configured according to the SCCo “Standard Outpost Configuration Instructions” (available on the same page).</p>`)
 		} else if fccCallSignRE.MatchString(a.sm.FromCallSign) {
 			act := msgid[:3]
 			exp := a.sm.FromCallSign[len(a.sm.FromCallSign)-3:]
 			if act != exp {
 				a.setSummary("incorrect message number prefix")
-				fmt.Fprintf(a.analysis, `<h2>Incorrect Message Number Prefix</h2><p>The message number of this message has the prefix “%s”.  According to the SCCo “Standard Packet Message Subject Line” document (available on the <a href="https://www.scc-ares-races.org/data/packet/index.html">“Packet BBS Service” page</a> of the county ARES website), the prefix should be the last three characters of your call sign, “%s”.</p>`,
+				fmt.Fprintf(a.analysis, `<h2>Incorrect Message Number Prefix</h2><p>The message number of this message has the prefix “%s”.  According to the SCCo “Standard Packet Message Subject Line” document (available on the <a href="https://www.scc-ares-races.org/services/data/bbs">“Packet BBS Service” page</a> of the county ARES website), the prefix should be the last three characters of your call sign, “%s”.</p>`,
 					html.EscapeString(act), exp)
 			} else {
 				a.score++
@@ -337,15 +337,15 @@ func (a *Analysis) checkNonModel() {
 		}
 		if badpos && badloc {
 			a.setSummary("incorrect destination for form")
-			fmt.Fprintf(a.analysis, `<h2>Incorrect Destination for Form</h2><p>This message form is addressed to ICS Position “%s” at Location “%s”.  According to the “SCCo ARES/RACES Recommended Form Routing” document (available on the <a href="https://www.scc-ares-races.org/operations/go-kit-forms.">“Go Kit Forms” page</a> of the county ARES website), %ss should be addressed to %s at %s.</p>`,
+			fmt.Fprintf(a.analysis, `<h2>Incorrect Destination for Form</h2><p>This message form is addressed to ICS Position “%s” at Location “%s”.  According to the “SCCo ARES/RACES Recommended Form Routing” document (available on the <a href="https://www.scc-ares-races.org/operations/forms/go-kit">“Go Kit Forms” page</a> of the county ARES website), %ss should be addressed to %s at %s.</p>`,
 				html.EscapeString(*a.mb.FToICSPosition), html.EscapeString(*a.mb.FToLocation), html.EscapeString(a.mb.Type.Name), exppos, exploc)
 		} else if badpos {
 			a.setSummary(`incorrect "To ICS Position" for form`)
-			fmt.Fprintf(a.analysis, `<h2>Incorrect “To ICS Position” for Form</h2><p>This message form is addressed to ICS Position “%s”.  According to the “SCCo ARES/RACES Recommended Form Routing” document (available on the <a href="https://www.scc-ares-races.org/operations/go-kit-forms.html">“Go Kit Forms” page</a> of the county ARES website), %ss should be addressed to ICS Position %s.</p>`,
+			fmt.Fprintf(a.analysis, `<h2>Incorrect “To ICS Position” for Form</h2><p>This message form is addressed to ICS Position “%s”.  According to the “SCCo ARES/RACES Recommended Form Routing” document (available on the <a href="https://www.scc-ares-races.org/operations/forms/go-kit">“Go Kit Forms” page</a> of the county ARES website), %ss should be addressed to ICS Position %s.</p>`,
 				html.EscapeString(*a.mb.FToICSPosition), html.EscapeString(a.mb.Type.Name), exppos)
 		} else if badloc {
 			a.setSummary(`incorrect "To Location" for form`)
-			fmt.Fprintf(a.analysis, `<h2>Incorrect “To Location” for Form</h2><p>This message form is addressed to Location “%s”.  According to the “SCCo ARES/RACES Recommended Form Routing” document (available on the <a href="https://www.scc-ares-races.org/operations/go-kit-forms.html">“Go Kit Forms” page</a> of the county ARES website), %ss should be addressed to Location %s.</p>`,
+			fmt.Fprintf(a.analysis, `<h2>Incorrect “To Location” for Form</h2><p>This message form is addressed to Location “%s”.  According to the “SCCo ARES/RACES Recommended Form Routing” document (available on the <a href="https://www.scc-ares-races.org/operations/forms/go-kit">“Go Kit Forms” page</a> of the county ARES website), %ss should be addressed to Location %s.</p>`,
 				html.EscapeString(*a.mb.FToLocation), html.EscapeString(a.mb.Type.Name), exploc)
 		}
 		// Make sure the message has a handling order allowed by the
@@ -361,7 +361,7 @@ func (a *Analysis) checkNonModel() {
 			}
 			if exphand != "" && exphand != acthand {
 				a.setSummary("incorrect handling order for form")
-				fmt.Fprintf(a.analysis, `<h2>Incorrect Handling Order for Form</h2><p>This message has handling order “%s”.  According to the “SCCo ARES/RACES Recommended Form Routing” document (available on the <a href="https://www.scc-ares-races.org/operations/go-kit-forms.html">“Go Kit Forms” page</a> of the county ARES website), it should have handling order “%s”.</p>`,
+				fmt.Fprintf(a.analysis, `<h2>Incorrect Handling Order for Form</h2><p>This message has handling order “%s”.  According to the “SCCo ARES/RACES Recommended Form Routing” document (available on the <a href="https://www.scc-ares-races.org/operations/forms/go-kit">“Go Kit Forms” page</a> of the county ARES website), it should have handling order “%s”.</p>`,
 					html.EscapeString(acthand), exphand)
 			} else {
 				a.score++
@@ -444,7 +444,7 @@ func (a *Analysis) compareAgainstModel() {
 		} else {
 			plural = "s were"
 		}
-		fmt.Fprintf(a.analysis, `<p>NOTE: The %s field%s not provided in the model message.  Recommended values for key fields should be filled in based on the “SCCo ARES/RACES Recommended Form Routing” document (available on the <a href="https://www.scc-ares-races.org/operations/go-kit-forms.">“Go Kit Forms” page</a> of the county ARES website) when the message author does not provide them.</p>`,
+		fmt.Fprintf(a.analysis, `<p>NOTE: The %s field%s not provided in the model message.  Recommended values for key fields should be filled in based on the “SCCo ARES/RACES Recommended Form Routing” document (available on the <a href="https://www.scc-ares-races.org/operations/forms/go-kit">“Go Kit Forms” page</a> of the county ARES website) when the message author does not provide them.</p>`,
 			english.Conjoin(recRouteMismatch, "and"), plural)
 	}
 }
