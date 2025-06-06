@@ -12,7 +12,7 @@ import (
 	"github.com/rothskeller/wppsvr/store"
 )
 
-var plainModelReplacer = strings.NewReplacer("¡", "", "-", "&#8209;")
+var plainModelReplacer = strings.NewReplacer("¡", "", "-", "‑")
 
 // serveInstructions displays the instructions for a session.
 func (ws *webserver) serveInstructions(w http.ResponseWriter, r *http.Request) {
