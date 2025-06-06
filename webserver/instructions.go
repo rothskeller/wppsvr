@@ -12,6 +12,8 @@ import (
 	"github.com/rothskeller/wppsvr/store"
 )
 
+var plainModelReplacer = strings.NewReplacer("¡", "", "-", "&#8209;")
+
 // serveInstructions displays the instructions for a session.
 func (ws *webserver) serveInstructions(w http.ResponseWriter, r *http.Request) {
 	var (
@@ -101,9 +103,9 @@ func (ws *webserver) serveInstructions(w http.ResponseWriter, r *http.Request) {
 	if msg, ok := session.ModelMsg.(*plaintext.PlainText); ok {
 		grid := main.E("div id=plainmodel")
 		grid.E("div>Subject:")
-		grid.E("div>%s", strings.ReplaceAll(msg.Subject, "¡", ""))
+		grid.E("div>%s", plainModelReplacer.Replace(msg.Subject))
 		grid.E("div>Message:")
-		grid.E("div>%s", strings.ReplaceAll(msg.Body, "¡", ""))
+		grid.E("div>%s", plainModelReplacer.Replace(msg.Body))
 	}
 	main.E("p style=margin-bottom:0>The following references may be helpful to you:")
 	list := main.E("ul style=margin-top:0")
